@@ -1,6 +1,9 @@
 import os
 import subprocess
 import shutil
+import json
+import re
+import concurrent.futures
 
 class VibeCompiler:
     def __init__(self):
@@ -24,7 +27,6 @@ class VibeCompiler:
 
     def init_project(self, name, template="basic"):
         # Improved sanitization: only allow alphanumeric, underscores, and hyphens
-        import re
         if not re.match(r"^[a-zA-Z0-9_-]+$", name):
             print("Error: Invalid project name. Use only alphanumeric characters, underscores, and hyphens.")
             return False
@@ -41,7 +43,6 @@ class VibeCompiler:
         shutil.copytree(template_path, name)
 
         # Update vibe.json with project name using proper JSON handling
-        import json
         config_path = os.path.join(name, "vibe.json")
         try:
             with open(config_path, "r") as f:
@@ -72,9 +73,32 @@ class VibeCompiler:
         print(f"Project '{name}' initialized successfully.")
         return True
 
+    def _compile_file(self, src, include_dir, arch=None, extra_flags=None):
+        """Compile a single C file to an object file with incremental check."""
+        rel_path = os.path.relpath(src, "src")
+        # Use splitext to handle extensions correctly and avoid replacing .c in middle of path
+        base_name, _ = os.path.splitext(rel_path)
+        obj = os.path.join("build", "obj", base_name + ".o")
+        os.makedirs(os.path.dirname(obj), exist_ok=True)
+
+        # Incremental build: skip if object file is newer than source
+        if os.path.exists(obj) and os.path.getmtime(src) <= os.path.getmtime(obj):
+            return obj
+
+        print(f"  Compiling {src}...")
+        cmd = ["clang", "-I" + include_dir, "-c", src, "-o", obj]
+        if arch:
+            cmd += ["-target", arch]
+        if extra_flags:
+            cmd += extra_flags
+
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            print(f"Error compiling {src}:\n{res.stderr}")
+            return None
+        return obj
+
     def build_project(self, arch=None, lib_type=None):
-        import json
-        import re
         if not os.path.exists("vibe.json"):
             print("Error: Not a vibe project (vibe.json not found).")
             return False
@@ -88,18 +112,14 @@ class VibeCompiler:
             print("Error: Invalid project name in vibe.json.")
             return False
 
-        proj_type = config.get("type", "executable")
-
-        # Override project type if lib_type is specified
-        if lib_type and lib_type != "none":
-            proj_type = lib_type
+        proj_type = lib_type if lib_type and lib_type != "none" else config.get("type", "executable")
 
         if not os.path.exists("build"):
             os.makedirs("build")
 
         # Find all .c files in src
         src_files = []
-        for root, dirs, files in os.walk("src"):
+        for root, _, files in os.walk("src"):
             for file in files:
                 if file.endswith(".c"):
                     src_files.append(os.path.join(root, file))
@@ -108,6 +128,23 @@ class VibeCompiler:
             print("Error: No source files found in src/")
             return False
 
+        # Prepare for parallel compilation
+        print(f"Building {proj_name} ({proj_type})...")
+        extra_flags = ["-fPIC"] if proj_type == "shared" else []
+
+        # Ensure build/obj directory exists
+        os.makedirs(os.path.join("build", "obj"), exist_ok=True)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Map source files to compilation tasks
+            futures = [executor.submit(self._compile_file, src, self.include_dir, arch, extra_flags) for src in src_files]
+            obj_files = [f.result() for f in futures]
+
+        if None in obj_files:
+            print("Build failed due to compilation errors.")
+            return False
+
+        # Define output artifact name
         if proj_type == "static":
             output_name = f"build/lib{proj_name}.a"
         elif proj_type == "shared":
@@ -115,46 +152,31 @@ class VibeCompiler:
         else:
             output_name = f"build/{proj_name}"
 
-        cmd = ["clang", "-I" + self.include_dir]
-        if arch:
-            cmd += ["-target", arch]
-
-        if proj_type == "shared":
-            cmd += ["-shared", "-fPIC"]
-
+        # Linking stage
         if proj_type == "static":
-            # For static lib, we compile to .o then use ar
-            obj_files = []
-            for src in src_files:
-                print(f"Compiling {src}...")
-                # relative path to src
-                rel_path = os.path.relpath(src, "src")
-                obj = os.path.join("build", rel_path.replace(".c", ".o"))
-                os.makedirs(os.path.dirname(obj), exist_ok=True)
-                res = subprocess.run(["clang", "-I" + self.include_dir, "-c", src, "-o", obj])
-                if res.returncode != 0:
-                    print(f"Error compiling {src}")
-                    return False
-                obj_files.append(obj)
             print(f"Creating static library {output_name}...")
             res = subprocess.run(["ar", "rcs", output_name] + obj_files)
-            if res.returncode != 0:
-                print("Error creating static library")
-                return False
+        elif proj_type == "shared":
+            print(f"Linking shared library {output_name}...")
+            link_cmd = ["clang", "-shared", "-o", output_name] + obj_files
+            if arch:
+                link_cmd += ["-target", arch]
+            res = subprocess.run(link_cmd)
         else:
-            print(f"Compiling project...")
-            cmd += src_files + ["-o", output_name]
-            result = subprocess.run(cmd)
-            if result.returncode != 0:
-                print("Build failed.")
-                return False
+            print(f"Linking executable {output_name}...")
+            link_cmd = ["clang", "-o", output_name] + obj_files
+            if arch:
+                link_cmd += ["-target", arch]
+            res = subprocess.run(link_cmd)
+
+        if res.returncode != 0:
+            print("Linking failed.")
+            return False
 
         print(f"Build successful: {output_name}")
         return True
 
     def run_project(self):
-        import json
-        import re
         if not os.path.exists("vibe.json"):
             print("Error: vibe.json not found.")
             return
@@ -256,7 +278,6 @@ class VibeCompiler:
             print("Error: Not in a Vibe project directory (vibe.json not found).")
             return
 
-        import json
         try:
             with open("vibe.json", "r") as f:
                 config = json.load(f)
@@ -359,7 +380,7 @@ class VibeCompiler:
 
         # Check for bandit (Python security)
         try:
-            import bandit
+            import bandit # Still keep this local as it is an optional external dependency
             print("\n[Optional] Running Bandit for deeper Python analysis...")
             res = subprocess.run(["bandit", "-r", self.vibe_dir])
             if res.returncode == 0:

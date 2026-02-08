@@ -37,3 +37,14 @@ Introduced a more flexible template system by allowing the `init` command to pul
 
 ### Project Status
 The `status` command parses `vibe.json` and scans the `src/` and `build/` directories to provide a quick overview of the project's health and size.
+
+### [1.3.0] - 2024-02-07
+#### Added
+- **Parallel Compilation**: The build system now compiles C files in parallel using all available CPU cores, significantly reducing build times for multi-file projects.
+- **Incremental Builds**: Implemented timestamp-based incremental builds. Only modified files are recompiled, making subsequent builds near-instantaneous.
+- **Unified Build Logic**: All project types (executable, shared, static) now share a common, optimized build path.
+- **Object File Management**: Build artifacts are now organized with object files stored in `build/obj/`.
+
+#### Changed
+- **Build Performance**: Refactored `vibe/core/compiler.py` to use `concurrent.futures.ThreadPoolExecutor` for parallel tasks.
+- **Import Optimization**: Moved heavy-use imports (`json`, `re`) to the top level for improved runtime efficiency.
