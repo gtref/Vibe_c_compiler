@@ -216,25 +216,25 @@ class VibeCompiler:
         src_files = []
         header_mtime = self._get_header_mtime(scan_src=False)
 
-        def _collect_src(path, rel_root=""):
-            nonlocal header_mtime
-            try:
-                for entry in os.scandir(path):
-                    if entry.is_file():
-                        if entry.name.endswith(".c"):
-                            # BOLT: Pre-calculate paths during initial scan
-                            rel_path = os.path.join(rel_root, entry.name)
-                            obj_path = os.path.join(obj_root, os.path.splitext(rel_path)[0] + ".o")
-                            src_files.append((entry.path, obj_path, entry.stat().st_mtime))
-                        elif entry.name.endswith(".h"):
-                            header_mtime = max(header_mtime, entry.stat().st_mtime)
-                    elif entry.is_dir():
-                        _collect_src(entry.path, os.path.join(rel_root, entry.name))
-            except OSError as e:
-                print(f"Warning: Could not scan source directory '{path}': {e}")
-
         if os.path.exists("src"):
-            _collect_src("src")
+            # BOLT: Iterative stack-based scan to avoid recursion overhead
+            stack = [("src", "")]
+            while stack:
+                path, rel_root = stack.pop()
+                try:
+                    for entry in os.scandir(path):
+                        if entry.is_file():
+                            if entry.name.endswith(".c"):
+                                # BOLT: Pre-calculate paths during initial scan
+                                rel_path = os.path.join(rel_root, entry.name)
+                                obj_path = os.path.join(obj_root, os.path.splitext(rel_path)[0] + ".o")
+                                src_files.append((entry.path, obj_path, entry.stat().st_mtime))
+                            elif entry.name.endswith(".h"):
+                                header_mtime = max(header_mtime, entry.stat().st_mtime)
+                        elif entry.is_dir():
+                            stack.append((entry.path, os.path.join(rel_root, entry.name)))
+                except OSError as e:
+                    print(f"Warning: Could not scan source directory '{path}': {e}")
 
         if not src_files:
             print("Error: No source files found in src/")
@@ -253,16 +253,19 @@ class VibeCompiler:
 
         # BOLT: Pre-collect object file mtimes using a single scandir pass to minimize stat calls
         obj_mtimes = {}
-        def _collect_obj_mtimes(path):
-            try:
-                for entry in os.scandir(path):
-                    if entry.is_file() and entry.name.endswith(".o"):
-                        obj_mtimes[entry.path] = entry.stat().st_mtime
-                    elif entry.is_dir():
-                        _collect_obj_mtimes(entry.path)
-            except OSError:
-                pass
-        _collect_obj_mtimes(obj_root)
+        if os.path.exists(obj_root):
+            # BOLT: Iterative stack-based scan for object files
+            stack = [obj_root]
+            while stack:
+                curr_path = stack.pop()
+                try:
+                    for entry in os.scandir(curr_path):
+                        if entry.is_file() and entry.name.endswith(".o"):
+                            obj_mtimes[entry.path] = entry.stat().st_mtime
+                        elif entry.is_dir():
+                            stack.append(entry.path)
+                except OSError:
+                    pass
 
         # BOLT: Pre-filter files that actually need compilation
         to_compile = []
@@ -368,18 +371,24 @@ class VibeCompiler:
             print("No tests/ directory found.")
             return
 
-        # BOLT: Efficiently collect test files and their mtimes using os.scandir
+        # BOLT: Efficiently collect test files and their mtimes using os.scandir (iterative)
         test_files = []
-        def _collect_tests(path):
-            try:
-                for entry in os.scandir(path):
-                    if entry.is_file() and entry.name.endswith(".c"):
-                        test_files.append((entry.path, entry.stat().st_mtime))
-                    elif entry.is_dir():
-                        _collect_tests(entry.path)
-            except OSError as e:
-                print(f"Warning: Could not scan test directory '{path}': {e}")
-        _collect_tests("tests")
+        test_bin_dir = "build/tests"
+        if os.path.exists("tests"):
+            stack = ["tests"]
+            while stack:
+                curr_path = stack.pop()
+                try:
+                    for entry in os.scandir(curr_path):
+                        if entry.is_file() and entry.name.endswith(".c"):
+                            # BOLT: Pre-calculate test name and binary path to avoid redundant work
+                            test_name = os.path.splitext(entry.name)[0]
+                            output_bin = os.path.join(test_bin_dir, test_name)
+                            test_files.append((entry.path, entry.stat().st_mtime, test_name, output_bin))
+                        elif entry.is_dir():
+                            stack.append(entry.path)
+                except OSError as e:
+                    print(f"Warning: Could not scan test directory '{curr_path}': {e}")
 
         if not test_files:
             print("No test files (.c) found in tests/.")
@@ -422,8 +431,7 @@ class VibeCompiler:
         # BOLT: Calculate header_mtime for tests to enable incremental compilation
         header_mtime = self._get_header_mtime(scan_src=True)
 
-        def _compile_test(test_file, output_bin):
-            test_name = os.path.splitext(os.path.basename(test_file))[0]
+        def _compile_test(test_file, output_bin, test_name):
             print(f"Compiling {test_file}...")
             # Sentinel: Added security hardening flags for tests
             cmd = ["clang", "-I" + self.include_dir, "-Isrc", test_file,
@@ -441,7 +449,6 @@ class VibeCompiler:
 
         # BOLT: Pre-collect test binary mtimes to avoid redundant stat calls
         test_bin_mtimes = {}
-        test_bin_dir = "build/tests"
         if os.path.exists(test_bin_dir):
             try:
                 for entry in os.scandir(test_bin_dir):
@@ -454,10 +461,7 @@ class VibeCompiler:
         to_compile = []
         compilation_results = []
 
-        for test_file, test_mtime in test_files:
-            test_name = os.path.splitext(os.path.basename(test_file))[0]
-            output_bin = os.path.join(test_bin_dir, test_name)
-
+        for test_file, test_mtime, test_name, output_bin in test_files:
             needs_compile = True
             bin_mtime = test_bin_mtimes.get(output_bin)
             if bin_mtime is not None:
@@ -467,7 +471,7 @@ class VibeCompiler:
                     needs_compile = False
 
             if needs_compile:
-                to_compile.append(test_file)
+                to_compile.append((test_file, output_bin, test_name))
             else:
                 compilation_results.append({
                     "file": test_file,
@@ -479,15 +483,8 @@ class VibeCompiler:
 
         if to_compile:
             print(f"Compiling {len(to_compile)} tests in parallel...")
-            # BOLT: Pass pre-calculated output paths
-            compile_args = []
-            for test_file in to_compile:
-                test_name = os.path.splitext(os.path.basename(test_file))[0]
-                output_bin = os.path.join(test_bin_dir, test_name)
-                compile_args.append((test_file, output_bin))
-
             with ThreadPoolExecutor() as executor:
-                compilation_results.extend(list(executor.map(lambda x: _compile_test(x[0], x[1]), compile_args)))
+                compilation_results.extend(list(executor.map(lambda x: _compile_test(x[0], x[1], x[2]), to_compile)))
 
         # BOLT: Run tests in parallel
         print(f"Running {len(compilation_results)} tests in parallel...")

@@ -51,3 +51,7 @@
 ## 2026-06-20 - [Optimized String Escaping with strcspn]
 **Learning:** Replacing a manual character-by-character loop with `strcspn` for string scanning can yield significant performance gains (e.g., ~20% faster scanning). Modern C standard libraries often provide SIMD-optimized implementations of `strcspn`. Furthermore, replacing heavy-weight functions like `printf` with manual buffer construction for simple formatting (like hex conversion) can double the speed of string processing hot paths.
 **Action:** Use `strcspn` or `strpbrk` for scanning strings for multiple target characters, and avoid `printf` in high-frequency loops when simple manual formatting is possible.
+
+## 2026-07-12 - [Iterative Traversal and Meta-Data Caching]
+**Learning:** In complex project structures, recursive directory traversal can incur significant stack overhead and hit depth limits. Transitioning all scanners to an iterative stack-based approach using `os.scandir` ensures robustness. Furthermore, pre-calculating and caching derived metadata (like binary output paths and test names) during the discovery phase, and storing them in a flat list, eliminates thousands of redundant string operations (splitext, join) in subsequent hot loops or parallel workers.
+**Action:** Use iterative stack-based scanners for all directory traversals and pre-calculate as much derived file metadata as possible during the initial discovery pass to avoid redundant work in processing loops.
