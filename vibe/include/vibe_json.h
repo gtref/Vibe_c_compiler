@@ -1,3 +1,9 @@
+/*
+ * This header has been updated to include comprehensive documentation and logic explanations.
+ * The changes enhance maintainability by detailing the lightweight JSON parser and high-performance secure printer.
+ * THIS CODE IS AI GENERATED.
+ */
+
 #ifndef VIBE_JSON_H
 #define VIBE_JSON_H
 
@@ -6,15 +12,22 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+/**
+ * Supported JSON data types.
+ */
 typedef enum {
-    VIBE_JSON_NULL,
-    VIBE_JSON_BOOL,
-    VIBE_JSON_NUMBER,
-    VIBE_JSON_STRING,
-    VIBE_JSON_ARRAY,
-    VIBE_JSON_OBJECT
+    VIBE_JSON_NULL,   /* Represents a null value */
+    VIBE_JSON_BOOL,   /* Represents a boolean value (true/false) */
+    VIBE_JSON_NUMBER, /* Represents a numeric value (double) */
+    VIBE_JSON_STRING, /* Represents a string value */
+    VIBE_JSON_ARRAY,  /* Represents an ordered list of values */
+    VIBE_JSON_OBJECT  /* Represents a collection of name/value pairs */
 } vibe_json_type_t;
 
+/**
+ * Structure representing a JSON value.
+ * Uses a union to store the actual data based on the 'type' field.
+ */
 typedef struct vibe_json_value {
     vibe_json_type_t type;
     union {
@@ -33,6 +46,13 @@ typedef struct vibe_json_value {
     } value;
 } vibe_json_value_t;
 
+/**
+ * vibe_json_new_string - Creates a new JSON string value.
+ * @s: The C string to wrap
+ *
+ * Allocates a new vibe_json_value_t and duplicates the input string.
+ * Returns the new value or NULL on allocation failure.
+ */
 static inline vibe_json_value_t* vibe_json_new_string(const char* s) {
     if (!s) return NULL;
     vibe_json_value_t* v = (vibe_json_value_t*)malloc(sizeof(vibe_json_value_t));
@@ -46,6 +66,10 @@ static inline vibe_json_value_t* vibe_json_new_string(const char* s) {
     return v;
 }
 
+/**
+ * vibe_json_free - Recursively frees a JSON value structure.
+ * @v: The root value to free
+ */
 static inline void vibe_json_free(vibe_json_value_t* v) {
     if (!v) return;
     if (v->type == VIBE_JSON_STRING) {
@@ -66,6 +90,10 @@ static inline void vibe_json_free(vibe_json_value_t* v) {
     free(v);
 }
 
+/**
+ * Internal helper to print a string with JSON escaping.
+ * Handles special characters like quotes, backslashes, and control characters.
+ */
 static inline void _vibe_json_print_escaped(const char* s) {
     if (!s) { fputs("null", stdout); return; }
     putchar('\"');
@@ -99,6 +127,12 @@ static inline void _vibe_json_print_escaped(const char* s) {
     putchar('\"');
 }
 
+/**
+ * vibe_json_print - Prints a JSON value structure to standard output.
+ * @v: The JSON value to print
+ *
+ * Uses optimized chunked I/O and secure escaping for string values.
+ */
 static inline void vibe_json_print(vibe_json_value_t* v) {
     if (!v) { fputs("null", stdout); return; }
     switch(v->type) {

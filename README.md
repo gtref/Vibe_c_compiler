@@ -19,6 +19,7 @@ The Vibe C Compiler is a project management and compilation suite designed to ma
 - **Thread Pool Robustness**: Added comprehensive error handling (malloc, pthread_create), atomic initialization/cleanup, and $O(1)$ job insertion to the worker thread pool (v1.5.1).
 - **Regex NULL Safety**: Implemented NULL pointer checks in `vibe_regex_match` to prevent application crashes (v1.5.2).
 - **Optimized XOR Cipher**: Replaced modulo operator with incremental indexing in `vibe_xor_cipher` for significantly improved performance (v1.5.2).
+- **Auditor Suppression Support**: Added support for `// nosec` and `/* nosec */` suppression in C/H files to eliminate false positives (v1.5.3).
 - **Secure JSON Printing**: Built-in JSON printing with full control character escaping and high-performance chunked I/O (v1.4.7).
 - **Compile-time Format String Hardening**: Enforces string literals in printing macros to prevent format string injection at the source (v1.5.1).
 - **Secure Memory Primitives**: Added `vibe_secure_memzero` to ensure sensitive data can be securely wiped from memory (v1.4.8).

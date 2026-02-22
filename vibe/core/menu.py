@@ -1,7 +1,17 @@
+"""
+This file has been updated to include comprehensive documentation and logic explanations.
+The changes enhance maintainability by detailing the interactive TUI menu and project management interface.
+THIS CODE IS AI GENERATED.
+"""
+
 import os
 import sys
 
 def run_menu(compiler):
+    """
+    Displays an interactive menu for managing the Vibe C project.
+    Allows users to perform common tasks without remembering CLI flags.
+    """
     version = "unknown"
     if os.path.exists(compiler.version_file):
         with open(compiler.version_file, "r") as f:

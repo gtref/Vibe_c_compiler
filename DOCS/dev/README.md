@@ -66,6 +66,7 @@ The `audit` command uses an optimized regex-based detection system to identify c
 - **Named Groups**: Python pattern matching uses named capture groups for efficient identification of the specific vulnerability detected.
 - **Word Boundaries**: C and Python patterns use `\b` word boundaries to prevent false positives and bypasses like `(printf)("...")` (v1.4.7).
 - **Self-Auditing**: As of v1.4.8, the audit tool also scans the compiler's internal headers (`vibe/include/`) and includes an expanded set of 8 additional C functions and 3 Python patterns.
+- **Suppression Support**: Support for `// nosec` and `/* nosec */` in C/H files allows developers to suppress legitimate uses of unsafe functions (v1.5.3).
 
 ### Environment Sanitization
 - **LD_LIBRARY_PATH**: In `run_tests`, we explicitly sanitize `LD_LIBRARY_PATH` by splitting it, filtering out empty entries (which are interpreted as the current directory `.` by the dynamic linker), and then prepending the `build` directory. This mitigates shared library injection vulnerabilities (v1.4.4).

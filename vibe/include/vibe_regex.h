@@ -1,3 +1,9 @@
+/*
+ * This header has been updated to include comprehensive documentation and logic explanations.
+ * The changes enhance maintainability by detailing the POSIX regular expression matching and safety checks.
+ * THIS CODE IS AI GENERATED.
+ */
+
 #ifndef VIBE_REGEX_H
 #define VIBE_REGEX_H
 
@@ -6,7 +12,12 @@
 #include <stddef.h>
 
 /**
- * vibe_regex_match - Check if a string matches a pattern
+ * vibe_regex_match - Check if a string matches a POSIX extended regular expression.
+ * @pattern: The regular expression pattern string
+ * @text: The input text to check
+ *
+ * Compiles and executes the regex. Includes NULL pointer checks for safety.
+ * Returns true if the text matches the pattern, false otherwise.
  */
 static inline bool vibe_regex_match(const char* pattern, const char* text) {
     if (!pattern || !text) return false;

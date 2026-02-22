@@ -14,7 +14,7 @@
 - `clean`: Removes the `build/` directory.
 - `menu`: Opens the interactive menu.
 - `version`: Shows the current version.
-- `audit`: Runs a security audit on the compiler and your project (now with self-auditing of internal headers as of v1.4.8).
+- `audit`: Runs a security audit on the compiler and your project (now with self-auditing of internal headers as of v1.4.8, and suppression support as of v1.5.3).
 - `update` / `upgrade`: Updates the Vibe C Compiler from its GitHub repository.
 - `status`: Displays current project information (name, version, type, sources, and build artifacts).
 - `headers`: Lists all available Vibe C custom headers.
@@ -86,7 +86,7 @@ vcc audit
 ```
 
 This command performs:
-1.  **Internal Audit**: Built-in pattern-based checks for common C and Python security issues. It features a high-performance parallelized scanner (v1.4.6) that uses an optimized regex-based detection system with $O(\log N)$ line-numbering and $O(1)$ matching complexity per line. As of v1.4.8, it also performs self-auditing of the compiler's own internal headers and includes detection for an expanded set of 8 additional C functions and 3 Python patterns. It scans `src/`, `vibe/`, and `tests/` for unsafe functions and Python anti-patterns.
+1.  **Internal Audit**: Built-in pattern-based checks for common C and Python security issues. It features a high-performance parallelized scanner (v1.4.6) that uses an optimized regex-based detection system with $O(\log N)$ line-numbering and $O(1)$ matching complexity per line. As of v1.4.8, it also performs self-auditing of the compiler's own internal headers and includes detection for an expanded set of 8 additional C functions and 3 Python patterns. It scans `src/`, `vibe/`, and `tests/` for unsafe functions and Python anti-patterns. As of v1.5.3, it supports suppressing false positives using `# nosec` (Python), `// nosec` (C), or `/* nosec */` (Headers).
 2.  **Bandit** (Optional): A deeper security linter for Python (runs only if `bandit` is installed).
 3.  **Cppcheck** (Optional): A more advanced static analysis tool for C/C++ (runs only if `cppcheck` is installed).
 

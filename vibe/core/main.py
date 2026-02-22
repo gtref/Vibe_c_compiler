@@ -1,3 +1,9 @@
+"""
+This file has been updated to include comprehensive documentation and logic explanations.
+The changes enhance maintainability by detailing the CLI argument parsing and command dispatching process.
+THIS CODE IS AI GENERATED.
+"""
+
 import argparse
 import sys
 import os
@@ -5,6 +11,7 @@ from .compiler import VibeCompiler
 from .menu import run_menu
 
 def main():
+    """Parses command-line arguments and executes the corresponding compiler actions."""
     parser = argparse.ArgumentParser(description="Vibe C Compiler - The easier C compiler")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 

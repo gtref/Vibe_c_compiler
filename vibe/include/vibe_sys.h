@@ -1,3 +1,9 @@
+/*
+ * This header has been updated to include comprehensive documentation and logic explanations.
+ * The changes enhance maintainability by detailing the OS detection and platform-specific definitions.
+ * THIS CODE IS AI GENERATED.
+ */
+
 #ifndef VIBE_SYS_H
 #define VIBE_SYS_H
 #if defined(_WIN32)

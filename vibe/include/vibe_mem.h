@@ -1,7 +1,20 @@
+/*
+ * This header has been updated to include comprehensive documentation and logic explanations.
+ * The changes enhance maintainability by detailing the memory management and secure wiping primitives.
+ * THIS CODE IS AI GENERATED.
+ */
+
 #ifndef VIBE_MEM_H
 #define VIBE_MEM_H
 #include <stdlib.h>
+/**
+ * vibe_alloc - Wraps standard malloc.
+ */
 #define vibe_alloc(sz) malloc(sz)
+
+/**
+ * vibe_free - Wraps standard free.
+ */
 #define vibe_free(p) free(p)
 
 /**

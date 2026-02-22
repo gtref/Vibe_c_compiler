@@ -1,3 +1,9 @@
+"""
+This file has been updated to include comprehensive documentation and logic explanations.
+The changes enhance maintainability by detailing the parallel compilation, incremental build engine, and security auditing systems.
+THIS CODE IS AI GENERATED.
+"""
+
 import os
 import subprocess
 import shutil
@@ -7,6 +13,11 @@ import bisect
 from concurrent.futures import ThreadPoolExecutor # BOLT: Parallel compilation
 
 class VibeCompiler:
+    """
+    The main driver class for the Vibe C Compiler.
+    Handles project initialization, building, running, testing, and security auditing.
+    """
+
     # BOLT: Pre-defined unsafe patterns for security audits moved to class level
     _C_UNSAFE_FUNCS = {
         "gets": "Extremely unsafe, use fgets instead.",
@@ -64,6 +75,7 @@ class VibeCompiler:
     _PY_PATTERN_KEYS = None # BOLT: Cached pattern keys for Python audit
 
     def __init__(self):
+        """Initializes the compiler with paths to core directories and files."""
         # __file__ is vibe/core/compiler.py
         # dirname(dirname(dirname(__file__))) is the root directory
         self.base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -74,7 +86,10 @@ class VibeCompiler:
         self._vibe_include_mtime_cache = None # BOLT: Cache for compiler headers
 
     def _get_header_mtime(self, scan_src=True):
-        """BOLT: Get the latest modification time among all headers using efficient scanning."""
+        """
+        BOLT: Get the latest modification time among all headers using efficient scanning.
+        Caches global header mtime to avoid redundant scans during the same execution.
+        """
         # Check cache for global vibe headers if they haven't been scanned yet
         if self._vibe_include_mtime_cache is None:
             self._vibe_include_mtime_cache = self._scan_for_mtime(self.include_dir, (".h",))
@@ -87,7 +102,10 @@ class VibeCompiler:
         return header_mtime
 
     def _scan_for_mtime(self, path, extensions):
-        """BOLT: Non-recursive helper to scan for latest mtime using a stack and os.scandir for performance."""
+        """
+        BOLT: Non-recursive helper to scan for latest mtime using a stack and os.scandir for performance.
+        Avoids recursion depth errors and minimizes system calls.
+        """
         max_mtime = 0
         if not os.path.exists(path):
             return 0
@@ -108,7 +126,10 @@ class VibeCompiler:
         return max_mtime
 
     def _compile_src(self, src, obj, arch, proj_type):
-        """BOLT: Helper to compile a single source file to an object file."""
+        """
+        BOLT: Helper to compile a single source file to an object file using Clang.
+        Applies security hardening flags (stack protector, fortify source, etc.).
+        """
         # BOLT: Object path is now pre-calculated and directories pre-created
         print(f"Compiling {src}...")
         # Sentinel: Added security hardening flags
@@ -126,6 +147,7 @@ class VibeCompiler:
         return obj if res.returncode == 0 else None
 
     def show_version(self):
+        """Reads and displays the current compiler version from the VERSION file."""
         try:
             with open(self.version_file, "r") as f:
                 version = f.read().strip()
@@ -136,6 +158,10 @@ class VibeCompiler:
             return "unknown"
 
     def init_project(self, name, template="basic"):
+        """
+        Initializes a new project by copying a template and setting up vibe.json.
+        Validates project and template names to prevent injection and path traversal.
+        """
         # Improved sanitization: only allow alphanumeric, underscores, and hyphens
         if not re.match(r"^[a-zA-Z0-9_-]+$", name):
             print("Error: Invalid project name. Use only alphanumeric characters, underscores, and hyphens.")
@@ -150,11 +176,13 @@ class VibeCompiler:
             print(f"Error: Directory '{name}' already exists.")
             return False
 
+        # Determine template source path
         template_path = os.path.join(self.template_dir, template)
         if not os.path.exists(template_path):
             print(f"Error: Template '{template}' not found. Using 'basic' instead.")
             template_path = os.path.join(self.template_dir, "basic")
 
+        # Copy template files to the new project directory
         shutil.copytree(template_path, name)
 
         # Update vibe.json with project name using proper JSON handling
@@ -162,37 +190,38 @@ class VibeCompiler:
         try:
             with open(config_path, "r") as f:
                 config = json.load(f)
-
-            # If the template used {{name}}, it might not be valid JSON if it's not quoted
-            # But usually templates should have valid JSON with a placeholder.
-            # If it's literally {{name}} without quotes, json.load will fail.
-            # Let's check the templates.
         except json.JSONDecodeError:
-            # Fallback to string replacement if JSON is invalid due to placeholders
+            # Fallback to string replacement if JSON is invalid due to placeholders (e.g., {{name}})
             with open(config_path, "r") as f:
                 content = f.read()
             content = content.replace("{{name}}", name)
-            # Try to validate after replacement
             try:
                 config = json.loads(content)
             except json.JSONDecodeError:
                 print("Error: Failed to generate valid vibe.json")
                 return False
 
+        # Save the updated configuration
         config["name"] = name
         with open(config_path, "w") as f:
             json.dump(config, f, indent=2)
 
+        # Ensure build directory exists
         os.makedirs(os.path.join(name, "build"), exist_ok=True)
 
         print(f"Project '{name}' initialized successfully.")
         return True
 
     def build_project(self, arch=None, lib_type=None):
+        """
+        Builds the project using parallel compilation and incremental logic.
+        Detects changed files, compiles them to objects, and links the final binary.
+        """
         if not os.path.exists("vibe.json"):
             print("Error: Not a vibe project (vibe.json not found).")
             return False
 
+        # Read project configuration
         with open("vibe.json", "r") as f:
             config = json.load(f)
 
@@ -204,7 +233,7 @@ class VibeCompiler:
 
         proj_type = config.get("type", "executable")
 
-        # Override project type if lib_type is specified
+        # Override project type if lib_type is specified via CLI
         if lib_type and lib_type != "none":
             proj_type = lib_type
 
@@ -217,6 +246,7 @@ class VibeCompiler:
         header_mtime = self._get_header_mtime(scan_src=False)
 
         def _collect_src(path, rel_root=""):
+            """Recursively collects source files and tracks the latest header mtime."""
             nonlocal header_mtime
             try:
                 for entry in os.scandir(path):
@@ -233,6 +263,7 @@ class VibeCompiler:
             except OSError as e:
                 print(f"Warning: Could not scan source directory '{path}': {e}")
 
+        # Collect sources from src/ directory
         if os.path.exists("src"):
             _collect_src("src")
 
@@ -240,6 +271,7 @@ class VibeCompiler:
             print("Error: No source files found in src/")
             return False
 
+        # Determine output filename based on project type
         if proj_type == "static":
             output_name = f"build/lib{proj_name}.a"
         elif proj_type == "shared":
@@ -247,6 +279,7 @@ class VibeCompiler:
         else:
             output_name = f"build/{proj_name}"
 
+        # Sanitize architecture string
         if arch and not re.match(r"^[a-zA-Z0-9._-]+$", arch):
             print(f"Error: Invalid architecture name '{arch}'.")
             return False
@@ -273,6 +306,7 @@ class VibeCompiler:
             needs_compile = True
             obj_mtime = obj_mtimes.get(obj_path)
             if obj_mtime is not None:
+                # Incremental check: only recompile if src or headers are newer than the object file
                 if obj_mtime > src_mtime and obj_mtime > header_mtime:
                     needs_compile = False
 
@@ -289,6 +323,7 @@ class VibeCompiler:
             for d in obj_dirs:
                 os.makedirs(d, exist_ok=True)
 
+            # Perform parallel compilation
             with ThreadPoolExecutor() as executor:
                 results = list(executor.map(lambda x: self._compile_src(x[0], x[1], arch, proj_type), to_compile))
                 if None in results:
@@ -308,6 +343,7 @@ class VibeCompiler:
             if any(obj_mtimes.get(obj, 0) > target_mtime for obj in obj_files):
                 link_needed = True
 
+        # Perform linking if necessary
         if link_needed:
             if proj_type == "static":
                 print(f"Creating static library {output_name}...")
@@ -332,6 +368,7 @@ class VibeCompiler:
         print(f"Build successful: {output_name}")
         return True
     def run_project(self):
+        """Builds (if necessary) and executes the project's main binary."""
         if not os.path.exists("vibe.json"):
             print("Error: vibe.json not found.")
             return
@@ -357,6 +394,7 @@ class VibeCompiler:
         subprocess.run([abs_output_path])
 
     def clean_project(self):
+        """Removes the build directory and all compiled artifacts."""
         if os.path.exists("build"):
             shutil.rmtree("build")
             print("Cleaned build directory.")
@@ -364,6 +402,10 @@ class VibeCompiler:
             print("Nothing to clean.")
 
     def run_tests(self):
+        """
+        Automatically discovers, compiles, and runs C tests in the tests/ directory.
+        Uses parallel execution and incremental logic for high-speed testing.
+        """
         if not os.path.exists("tests"):
             print("No tests/ directory found.")
             return
@@ -527,6 +569,10 @@ class VibeCompiler:
         print(f"Total:  {len(test_files)}")
 
     def install_globally(self):
+        """
+        Installs the compiler globally by creating a 'vcc' symlink in ~/.local/bin.
+        Allows the compiler to be invoked from anywhere in the terminal.
+        """
         source_script = os.path.join(self.base_dir, "vibe_c_compiler")
         target_dir = os.path.expanduser("~/.local/bin")
         target_link = os.path.join(target_dir, "vcc")
@@ -550,6 +596,7 @@ class VibeCompiler:
             print(f"Error creating symlink: {e}")
 
     def uninstall_globally(self):
+        """Removes the global 'vcc' symlink from ~/.local/bin."""
         target_dir = os.path.expanduser("~/.local/bin")
         target_link = os.path.join(target_dir, "vcc")
 
@@ -563,6 +610,7 @@ class VibeCompiler:
             print(f"'vcc' is not installed in {target_dir}")
 
     def list_headers(self):
+        """Lists all custom C headers provided by the Vibe C Compiler."""
         if not os.path.exists(self.include_dir):
             print("Error: Include directory not found.")
             return
@@ -578,6 +626,7 @@ class VibeCompiler:
                 print(f"  - {header}")
 
     def list_templates(self):
+        """Lists all available project templates for project initialization."""
         if not os.path.exists(self.template_dir):
             print("Error: Template directory not found.")
             return
@@ -593,6 +642,7 @@ class VibeCompiler:
                 print(f"  - {template}")
 
     def project_status(self):
+        """Displays status information for the current Vibe project."""
         if not os.path.exists("vibe.json"):
             print("Error: Not in a Vibe project directory (vibe.json not found).")
             return
@@ -639,7 +689,10 @@ class VibeCompiler:
             print("Build:   No build directory found.")
 
     def _audit_file(self, path):
-        """BOLT: Unified auditor for both C and Python files with lazy line offset calculation."""
+        """
+        BOLT: Unified auditor for both C and Python files with lazy line offset calculation.
+        Uses regex patterns to find vulnerabilities and supports 'nosec' suppression.
+        """
         issues = []
         ext = os.path.splitext(path)[1]
         if ext not in (".c", ".h", ".py"):
@@ -693,6 +746,10 @@ class VibeCompiler:
         return issues
 
     def run_audit(self):
+        """
+        Runs a project-wide security audit using parallel regex scanning.
+        Identifies unsafe C functions and Python patterns, including self-auditing of Vibe headers.
+        """
         print("\n=== Vibe Security Audit ===")
 
         # BOLT: Pre-initialize regexes before starting threads for safety
@@ -778,6 +835,7 @@ class VibeCompiler:
         print("\nAudit complete. Always follow best security practices!")
 
     def update_compiler(self):
+        """Updates the compiler to the latest version by pulling from the Git repository."""
         print("Checking for updates...")
         try:
             # Check if we are in a git repository
