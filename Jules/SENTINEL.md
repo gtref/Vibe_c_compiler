@@ -177,6 +177,24 @@
 - Confirmed `vibe_thread_pool_destroy` correctly cleans up all threads and memory in `tests/test_thread_pool_functional.c`.
 - Verified all compiler tests and security audits pass with the new symlink restrictions.
 
+## 2026-06-24 - [1.5.5] - Thread Pool Integer Overflow and Shutdown Safety
+
+### 🔍 Found
+- **Integer Overflow Vulnerability**: In `vibe_thread_pool_create`, the size of the thread array was calculated as `sizeof(pthread_t) * num_threads`. On 32-bit systems, a large `num_threads` could cause this multiplication to overflow `size_t`, leading to a small heap allocation. Subsequent thread creation would then write past the end of the allocated buffer (Heap Buffer Overflow).
+- **Memory Leak on Shutdown**: `vibe_thread_pool_add_job` did not check if the pool was already shutting down. Jobs added during or after `vibe_thread_pool_destroy` would be queued but never processed or freed, leading to memory leaks.
+
+### 🎯 Impact
+- **Arbitrary Code Execution**: A heap buffer overflow can be exploited to overwrite function pointers or other critical data, potentially leading to arbitrary code execution.
+- **Denial of Service (DoS)**: Resource exhaustion via uncontrolled thread creation or memory leaks from orphaned jobs.
+
+### 🔧 Fix
+- **Hardened Initialization**: Added validation to `vibe_thread_pool_create` to enforce a maximum of 1024 threads, preventing both integer overflows and system-level resource exhaustion.
+- **Graceful Shutdown**: Updated `vibe_thread_pool_add_job` to check the `shutdown` flag under the pool lock. If the pool is shutting down, the function now safely frees the job and returns, preventing leaks.
+
+### ✅ Verification
+- Created `tests/test_threadpool_security.c` to verify that thread counts above 1024 are rejected and that jobs are correctly handled (freed) after pool shutdown.
+- Verified all 4 tests (functional, security, performance) pass successfully.
+
 ---
 
 ## Project Navigation

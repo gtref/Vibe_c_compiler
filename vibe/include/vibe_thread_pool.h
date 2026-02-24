@@ -48,7 +48,9 @@ static void* vibe_worker(void* thread_pool) {
 }
 
 static inline vibe_thread_pool_t* vibe_thread_pool_create(int num_threads) {
-    if (num_threads <= 0) return NULL;
+    // Sentinel: Enforce a reasonable maximum thread count to prevent resource exhaustion and integer overflows
+    if (num_threads <= 0 || num_threads > 1024) return NULL;
+
     vibe_thread_pool_t* pool = (vibe_thread_pool_t*)malloc(sizeof(vibe_thread_pool_t));
     if (!pool) return NULL;
 
@@ -110,6 +112,14 @@ static inline void vibe_thread_pool_add_job(vibe_thread_pool_t* pool, void (*fun
     job->next = NULL;
 
     pthread_mutex_lock(&(pool->lock));
+
+    // Sentinel: Prevent adding jobs to a pool that is shutting down to avoid memory leaks and undefined behavior
+    if (pool->shutdown) {
+        pthread_mutex_unlock(&(pool->lock));
+        free(job);
+        return;
+    }
+
     // BOLT: O(1) insertion using tail pointer, avoiding O(N) traversal inside lock
     if (pool->queue_tail == NULL) {
         pool->queue_head = job;

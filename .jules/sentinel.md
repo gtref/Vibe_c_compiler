@@ -72,3 +72,8 @@
 **Vulnerability:** Compiler followed symlinks during project scanning; thread pool lacked shutdown and validation.
 **Learning:** Directory traversal logic must explicitly decide whether to follow symlinks to avoid infinite loops or path traversal. Concurrency primitives must always include lifecycle management (destruction) and input validation to prevent resource exhaustion or DoS.
 **Prevention:** Use `follow_symlinks=False` in directory scanning unless symlinks are explicitly required. Ensure all allocated resources (threads, memory) have a clear path to being freed.
+
+## 2026-06-24 - Integer Overflow in Resource Allocation Bounds
+**Vulnerability:** Unchecked thread count in `vibe_thread_pool_create` could lead to heap buffer overflow on 32-bit systems.
+**Learning:** When allocating memory for arrays based on external counts (e.g., thread counts), always enforce a maximum bounds check. On platforms where `size_t` is the same size as `int`, multiplication can wrap around, leading to a small allocation followed by out-of-bounds writes.
+**Prevention:** Enforce strict limits on resource counts and always check if the calculated size for `malloc` would overflow `size_t`.
