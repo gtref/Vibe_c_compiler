@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
+"""
+The vibe_c_compiler script serves as the main executable driver for the Vibe C project management and compilation suite.
+It ensures that the project's core modules are correctly added to the system path before launching the primary CLI entry point.
+This code is AI-generated.
+"""
 import sys
 import os
 
-# Add the current directory to sys.path so we can import vibe
+# Add the current script directory to sys.path to enable local imports of the vibe package
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from vibe.core.main import main

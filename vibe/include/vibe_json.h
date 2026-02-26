@@ -1,3 +1,8 @@
+/**
+ * High-performance JSON parsing and printing library for Vibe C.
+ * Features optimized chunked I/O for printing, secure control character escaping, and standard-compliant NaN/Infinity handling.
+ * This code is AI-generated.
+ */
 #ifndef VIBE_JSON_H
 #define VIBE_JSON_H
 
@@ -7,6 +12,7 @@
 #include <stdio.h>
 #include <math.h>
 
+/* Enumeration of supported JSON value types */
 typedef enum {
     VIBE_JSON_NULL,
     VIBE_JSON_BOOL,
@@ -100,6 +106,7 @@ static inline void _vibe_json_print_escaped(const char* s) {
     putchar('\"');
 }
 
+/* Recursively prints a JSON value to stdout with full escaping and optimizations */
 static inline void vibe_json_print(vibe_json_value_t* v) {
     if (!v) { fputs("null", stdout); return; }
     switch(v->type) {

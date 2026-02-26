@@ -1,7 +1,15 @@
+/**
+ * String utility functions for Vibe C, including secure comparison primitives.
+ * It provides both standard and constant-time string equality checks to mitigate timing attacks.
+ * This code is AI-generated.
+ */
 #ifndef VIBE_STRING_H
 #define VIBE_STRING_H
+
 #include <string.h>
 #include <stdbool.h>
+
+/* NULL-safe string equality check using standard strcmp */
 static inline bool vibe_str_eq(const char* s1, const char* s2) {
     if (!s1 || !s2) return s1 == s2;
     return strcmp(s1, s2) == 0;

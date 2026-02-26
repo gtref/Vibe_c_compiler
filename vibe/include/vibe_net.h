@@ -1,3 +1,8 @@
+/**
+ * Networking utility functions for Vibe C, implementing TCP listening and connecting.
+ * Features security hardening including zero-initialization of structures and SOMAXCONN backlogs to mitigate DoS.
+ * This code is AI-generated.
+ */
 #ifndef VIBE_NET_H
 #define VIBE_NET_H
 
@@ -7,6 +12,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
+/* Create a TCP socket that listens on a specified port using SOMAXCONN backlog for DoS mitigation */
 static inline int vibe_net_listen(int port) {
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) return -1;
@@ -29,6 +35,7 @@ static inline int vibe_net_listen(int port) {
     return server_fd;
 }
 
+/* Establish a TCP connection to a specified IP address and port */
 static inline int vibe_net_connect(const char* ip, int port) {
     if (!ip) return -1;
     int sock = socket(AF_INET, SOCK_STREAM, 0);

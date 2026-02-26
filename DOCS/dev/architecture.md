@@ -42,7 +42,7 @@ A clean command-line interface built with `argparse`, and an optional interactiv
 - **String Security**: Implemented `vibe_str_eq_constant_time` to mitigate timing attacks on sensitive string comparisons (v1.4.9).
 - **Network Hardening**: Implemented zero-initialization of network structures and `SOMAXCONN` listen backlogs to prevent information leakage and DoS attacks (v1.5.0).
 - **Regex Safety**: `vibe_regex.h` includes NULL pointer checks to prevent crashes when matching unvalidated inputs (v1.5.2).
-- **Thread Pool Robustness**: `vibe_thread_pool.h` implements robust error handling for `malloc`, `pthread_mutex_init`, `pthread_cond_init`, and `pthread_create`, with atomic cleanup logic to prevent resource leaks and crashes (v1.5.1).
+- **Thread Pool Hardening**: `vibe_thread_pool.h` implements a strict 1024 thread limit and a 65536 job queue limit to prevent resource exhaustion and DoS. It also includes robust error handling for `malloc` and `pthread` failures, with atomic cleanup logic to prevent resource leaks and crashes (v1.5.1-v1.5.5).
 - **Compile-time Format String Hardening**: Hardens variadic macros in `vibe_io.h` and `vibe_log.h` by using string literal concatenation to prefix the format string with a literal, eliminating format string injection at the source (v1.5.1).
 - **Library Robustness**: Core headers include NULL pointer checks and secure, fully-compliant JSON escaping (v1.4.7-v1.5.2).
 

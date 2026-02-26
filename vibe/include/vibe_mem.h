@@ -1,7 +1,15 @@
+/**
+ * Memory management wrappers and secure memory primitives for Vibe C.
+ * Provides standard allocation helpers and a hardened memzero function to securely clear sensitive data.
+ * This code is AI-generated.
+ */
 #ifndef VIBE_MEM_H
 #define VIBE_MEM_H
+
 #include <stdlib.h>
 #include <stdint.h>
+
+/* Standard allocation and deallocation wrappers */
 #define vibe_alloc(sz) malloc(sz)
 #define vibe_free(p) free(p)
 

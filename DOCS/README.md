@@ -117,7 +117,7 @@ Vibe C features a high-performance build system optimized for developer producti
 - **Optimized XOR Cipher**: Uses incremental indexing instead of the modulo operator to maximize throughput in the XOR hot loop (v1.5.2).
 - **Incremental Builds & Tests**: Automatically detects changed source, headers, and libraries to only recompile and rerun what is necessary.
 - **Binary Hardening**: Automatically applies comprehensive security hardening flags (e.g., Stack Protector, PIE, RELRO) to all compilation and linking steps (v1.4.5).
-- **Thread Pool Robustness**: `vibe_thread_pool.h` includes comprehensive error handling for `malloc` and `pthread` failures, with atomic cleanup logic to prevent resource leaks (v1.5.1).
+- **Thread Pool Hardening**: `vibe_thread_pool.h` enforces a 1024 thread limit and a 65536 job queue limit with shutdown-aware job rejection to prevent resource exhaustion and memory leaks (v1.5.5).
 - **Optimized Scanning**: Efficient `os.scandir` scanning, cached header `mtime`, and $O(1)$ multi-pattern matching ensure that builds, tests, and security audits are high-performance (v1.4.4+).
 
 ---

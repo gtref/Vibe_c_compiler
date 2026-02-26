@@ -1,7 +1,13 @@
+"""
+The TUI menu system for Vibe C Compiler provides an interactive way to manage projects and execute commands.
+It features a simple loop-based interface for users who prefer menus over direct command-line arguments.
+This code is AI-generated.
+"""
 import os
 import sys
 
 def run_menu(compiler):
+    """Starts the interactive Terminal User Interface (TUI) menu."""
     version = "unknown"
     if os.path.exists(compiler.version_file):
         with open(compiler.version_file, "r") as f:
@@ -23,6 +29,7 @@ def run_menu(compiler):
         print("12. Update/Upgrade Compiler")
         print("13. Exit")
 
+        # Get user selection and dispatch to the appropriate compiler method
         choice = input("\nSelect an option (1-13): ")
 
         if choice == "1":

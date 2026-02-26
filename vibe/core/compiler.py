@@ -1,3 +1,8 @@
+"""
+The VibeCompiler class provides a robust and parallelized build system, security auditing, and project management tools.
+Recent enhancements include non-recursive stack-based directory traversal, optimized modification time caching, and unified security auditing for C and Python.
+This code is AI-generated.
+"""
 import os
 import subprocess
 import shutil
@@ -75,12 +80,13 @@ class VibeCompiler:
 
     def _get_header_mtime(self, scan_src=True):
         """BOLT: Get the latest modification time among all headers using efficient scanning."""
-        # Check cache for global vibe headers if they haven't been scanned yet
+        # Check cache for global vibe headers if they haven't been scanned yet to avoid redundant filesystem hits
         if self._vibe_include_mtime_cache is None:
             self._vibe_include_mtime_cache = self._scan_for_mtime(self.include_dir, (".h",))
 
         header_mtime = self._vibe_include_mtime_cache
 
+        # Optionally scan the project's own source directory for header changes
         if scan_src and os.path.exists("src"):
             header_mtime = max(header_mtime, self._scan_for_mtime("src", (".h",)))
 
@@ -189,10 +195,12 @@ class VibeCompiler:
         return True
 
     def build_project(self, arch=None, lib_type=None):
+        """Main build engine that manages the compilation and linking process."""
         if not os.path.exists("vibe.json"):
             print("Error: Not a vibe project (vibe.json not found).")
             return False
 
+        # Load project configuration
         with open("vibe.json", "r") as f:
             config = json.load(f)
 
@@ -264,7 +272,7 @@ class VibeCompiler:
                 pass
         _collect_obj_mtimes(obj_root)
 
-        # BOLT: Pre-filter files that actually need compilation
+        # BOLT: Pre-filter source files using modification times to enable fast incremental builds
         to_compile = []
         obj_files = []
         for src_path, obj_path, src_mtime in src_files:
@@ -273,6 +281,7 @@ class VibeCompiler:
             needs_compile = True
             obj_mtime = obj_mtimes.get(obj_path)
             if obj_mtime is not None:
+                # Only compile if the source or any header is newer than the existing object file
                 if obj_mtime > src_mtime and obj_mtime > header_mtime:
                     needs_compile = False
 

@@ -1,6 +1,6 @@
 /**
- * This file has been optimized to improve the performance of cryptographic primitives.
- * The XOR cipher now includes specialized paths for 1-byte and 8-byte keys to leverage word-sized operations and minimize loop overhead.
+ * Cryptographic primitives for Vibe C, providing XOR encryption and simple hashing.
+ * The XOR cipher is highly optimized with specialized paths for 1-byte and 8-byte keys to leverage word-sized operations.
  * This code is AI-generated.
  */
 #ifndef VIBE_CRYPT_H

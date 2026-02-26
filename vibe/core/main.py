@@ -1,3 +1,8 @@
+"""
+The main entry point for the Vibe C Compiler CLI, handling command-line argument parsing and command dispatch.
+This module leverages the argparse library to provide a clean and intuitive interface for project management and compilation tasks.
+This code is AI-generated.
+"""
 import argparse
 import sys
 import os
@@ -8,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description="Vibe C Compiler - The easier C compiler")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
-    # init
+    # Project initialization command
     init_parser = subparsers.add_parser("init", help="Initialize a new project")
     init_parser.add_argument("name", help="Name of the project")
     init_parser.add_argument("--template", default="basic", help="Template to use (basic, minimal)")

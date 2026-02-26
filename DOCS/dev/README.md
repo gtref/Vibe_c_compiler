@@ -77,7 +77,7 @@ The `audit` command uses an optimized regex-based detection system to identify c
 - **Network Hardening**: `vibe_net.h` implements zero-initialization of `sockaddr_in` structures and uses `SOMAXCONN` for listening backlogs to mitigate information leakage and DoS (v1.5.0).
 - **Regex Safety**: `vibe_regex.h` includes NULL pointer checks for pattern and text arguments to prevent crashes (v1.5.2).
 - **Library Robustness**: Core library functions in `vibe_json.h`, `vibe_crypt.h`, `vibe_file.h`, `vibe_string.h`, `vibe_net.h`, `vibe_regex.h`, and `vibe_thread_pool.h` include NULL pointer checks on their inputs to prevent runtime crashes (v1.4.7-v1.5.2).
-- **Thread Pool Robustness**: `vibe_thread_pool.h` implements robust error handling for `malloc`, `pthread_mutex_init`, `pthread_cond_init`, and `pthread_create`, ensuring that any initialization failure results in an atomic cleanup of resources (v1.5.1).
+- **Thread Pool Hardening**: `vibe_thread_pool.h` implements a strict 1024 thread limit and a 65536 job queue limit to prevent resource exhaustion and DoS. It also features robust error handling for `malloc` and `pthread` failures, with atomic cleanup logic to prevent resource leaks (v1.5.1-v1.5.5).
 - **Compile-time Format String Hardening**: Printing macros in `vibe_io.h` and `vibe_log.h` use string literal concatenation to prefix the format string with a literal, preventing format string injection vulnerabilities at compile-time (v1.5.1).
 
 ### Binary Hardening

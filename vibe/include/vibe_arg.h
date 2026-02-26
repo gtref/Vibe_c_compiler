@@ -1,3 +1,8 @@
+/**
+ * Simple command-line argument parsing utilities for Vibe C.
+ * Provides helper functions to check for flags and retrieve associated values from argv.
+ * This code is AI-generated.
+ */
 #ifndef VIBE_ARG_H
 #define VIBE_ARG_H
 

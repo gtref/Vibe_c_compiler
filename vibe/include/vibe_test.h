@@ -1,12 +1,21 @@
+/**
+ * Lightweight unit testing assertions for Vibe C.
+ * Provides basic macros for condition checking, equality testing, and test summary generation.
+ * This code is AI-generated.
+ */
 #ifndef VIBE_TEST_H
 #define VIBE_TEST_H
 
 #include <stdio.h>
 #include <string.h>
 
+/* Global counters for test execution and results */
 static int vibe_tests_run = 0;
 static int vibe_tests_failed = 0;
 
+/**
+ * Fundamental assertion macro that tracks success and failure
+ */
 #define VIBE_ASSERT(cond) do { \
     vibe_tests_run++; \
     if (!(cond)) { \
