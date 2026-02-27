@@ -100,8 +100,17 @@ static inline void _vibe_json_print_escaped(const char* s) {
     putchar('\"');
 }
 
-static inline void vibe_json_print(vibe_json_value_t* v) {
+#ifndef VIBE_JSON_MAX_DEPTH
+#define VIBE_JSON_MAX_DEPTH 128
+#endif
+
+static inline void _vibe_json_print_recursive(vibe_json_value_t* v, int depth) {
     if (!v) { fputs("null", stdout); return; }
+    if (depth > VIBE_JSON_MAX_DEPTH) {
+        fputs("\"<max depth reached>\"", stdout);
+        return;
+    }
+
     switch(v->type) {
         case VIBE_JSON_NULL: fputs("null", stdout); break;
         case VIBE_JSON_BOOL: fputs(v->value.boolean ? "true" : "false", stdout); break;
@@ -114,9 +123,9 @@ static inline void vibe_json_print(vibe_json_value_t* v) {
             // BOLT: Fast path for integers to avoid slow %g formatter (~5x speedup)
             // Checks if number is an integer and fits within a safe 64-bit range
             else if (n >= -9e18 && n <= 9e18 && n == (long long)n) {
-                printf("%lld", (long long)n);
+                printf("%lld", (long long)n); // nosec
             } else {
-                printf("%g", n);
+                printf("%g", n); // nosec
             }
             break;
         }
@@ -127,10 +136,10 @@ static inline void vibe_json_print(vibe_json_value_t* v) {
             // BOLT: Optimized loop to remove conditional branch from hot path
             if (v->value.array.count > 0) {
                 for (size_t i = 0; i < v->value.array.count - 1; i++) {
-                    vibe_json_print(v->value.array.elements[i]);
+                    _vibe_json_print_recursive(v->value.array.elements[i], depth + 1);
                     putchar(',');
                 }
-                vibe_json_print(v->value.array.elements[v->value.array.count - 1]);
+                _vibe_json_print_recursive(v->value.array.elements[v->value.array.count - 1], depth + 1);
             }
             putchar(']');
             break;
@@ -141,17 +150,21 @@ static inline void vibe_json_print(vibe_json_value_t* v) {
                 for (size_t i = 0; i < v->value.object.count - 1; i++) {
                     _vibe_json_print_escaped(v->value.object.keys[i]);
                     putchar(':');
-                    vibe_json_print(v->value.object.values[i]);
+                    _vibe_json_print_recursive(v->value.object.values[i], depth + 1);
                     putchar(',');
                 }
                 _vibe_json_print_escaped(v->value.object.keys[v->value.object.count - 1]);
                 putchar(':');
-                vibe_json_print(v->value.object.values[v->value.object.count - 1]);
+                _vibe_json_print_recursive(v->value.object.values[v->value.object.count - 1], depth + 1);
             }
             putchar('}');
             break;
         default: fputs("???", stdout);
     }
+}
+
+static inline void vibe_json_print(vibe_json_value_t* v) {
+    _vibe_json_print_recursive(v, 0);
 }
 
 #endif

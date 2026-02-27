@@ -197,6 +197,27 @@
 - Confirmed `vibe_thread_pool_destroy` correctly cleans up all threads and memory in `tests/test_thread_pool_functional.c`.
 - Verified all compiler tests and security audits pass with the new symlink restrictions.
 
+## 2026-06-26 - [1.5.6] - Constant-time Comparisons and JSON Depth Hardening
+
+### 🔍 Found
+- **Side-Channel Vulnerability (Timing Attack)**: `vibe_str_eq_constant_time` used `strlen()` to calculate lengths before comparison. This leaked the lengths of secret strings via timing side-channels, as `strlen`'s execution time depends on the null terminator's position.
+- **Denial of Service (DoS) - Stack Overflow**: `vibe_json_print` used unbounded recursion for nested JSON objects and arrays. An attacker could provide a deeply nested JSON structure to cause a stack overflow and crash the application.
+- **Audit Tool False Positives**: Safe uses of `printf` in `vibe_json.h` were being flagged by the security auditor.
+
+### 🎯 Impact
+- **Information Leakage**: Secret lengths could be recovered by an attacker.
+- **Application Availability**: Stack exhaustion leads to immediate crashes.
+- **Security Fatigue**: False positives in audit tools can mask real issues.
+
+### 🔧 Fix
+- **Safe Comparison**: Refactored `vibe_str_eq_constant_time` to use a single-pass loop without `strlen()`, minimizing length-based branching.
+- **Recursion Depth Limit**: Implemented a `VIBE_JSON_MAX_DEPTH` (128) limit in `vibe_json_print`. If exceeded, the printer outputs a placeholder instead of recursing deeper.
+- **Auditor Suppression**: Added `// nosec` to safe `printf` calls in the library.
+
+### ✅ Verification
+- Updated `tests/security_test.c` with more edge cases for constant-time string comparison.
+- Ran the full test suite and security audit; all tests passed and the library is now cleaner in the audit output.
+
 ---
 
 ## Project Navigation

@@ -12,14 +12,22 @@ static inline bool vibe_str_eq(const char* s1, const char* s2) {
  */
 static inline bool vibe_str_eq_constant_time(const char* s1, const char* s2) {
     if (!s1 || !s2) return s1 == s2;
-    size_t len1 = strlen(s1);
-    size_t len2 = strlen(s2);
-    int result = (len1 != len2);
-    size_t compare_len = len1 < len2 ? len1 : len2;
-    for (size_t i = 0; i < compare_len; i++) {
-        result |= s1[i] ^ s2[i];
+    const unsigned char* p1 = (const unsigned char*)s1;
+    const unsigned char* p2 = (const unsigned char*)s2;
+    unsigned char result = 0;
+    size_t i = 0;
+
+    // Single-pass comparison to avoid length-leaking strlen calls.
+    // For strings of equal length, this loop always runs for the full length plus the null terminator.
+    while (1) {
+        unsigned char c1 = p1[i];
+        unsigned char c2 = p2[i];
+        result |= (c1 ^ c2);
+        if (c1 == '\0' || c2 == '\0') break;
+        i++;
     }
-    return result == 0;
+
+    return result == 0 && p1[i] == '\0' && p2[i] == '\0';
 }
 
 #endif

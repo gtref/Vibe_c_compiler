@@ -26,6 +26,9 @@ void test_constant_time_eq() {
     VIBE_ASSERT(vibe_str_eq_constant_time("test", "fail") == false);
     VIBE_ASSERT(vibe_str_eq_constant_time("test", "test1") == false);
     VIBE_ASSERT(vibe_str_eq_constant_time("test1", "test") == false);
+    VIBE_ASSERT(vibe_str_eq_constant_time("", "") == true);
+    VIBE_ASSERT(vibe_str_eq_constant_time("a", "a") == true);
+    VIBE_ASSERT(vibe_str_eq_constant_time("a", "b") == false);
     VIBE_ASSERT(vibe_str_eq_constant_time(NULL, NULL) == true);
     VIBE_ASSERT(vibe_str_eq_constant_time(NULL, "test") == false);
 }
