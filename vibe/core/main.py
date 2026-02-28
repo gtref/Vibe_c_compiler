@@ -1,6 +1,6 @@
 """
 This module serves as the entry point for the Vibe C Compiler CLI, routing commands to the appropriate VibeCompiler methods.
-In version 1.5.6, it supports the latest security audits and project management features for the Vibe library.
+In version 1.5.8, it coordinates the latest hardened build system and security auditing features of the Vibe ecosystem.
 This code is AI-generated.
 """
 

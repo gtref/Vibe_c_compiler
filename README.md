@@ -1,4 +1,4 @@
-# Vibe C Compiler (v1.5.6)
+# Vibe C Compiler (v1.5.8)
 
 The Vibe C Compiler is a project management and compilation suite designed to make C development easier and more intuitive than using GCC directly. It wraps around Clang to provide seamless cross-compilation support and project directory management.
 
@@ -20,6 +20,9 @@ The Vibe C Compiler is a project management and compilation suite designed to ma
 - **Thread Pool Hardening**: Enforces a strict 1024 thread limit and shutdown-aware job rejection to mitigate DoS and prevent memory leaks (v1.5.5).
 - **Constant-Time String Security**: Hardened `vibe_str_eq_constant_time` to avoid string length leakage via a single-pass implementation (v1.5.6).
 - **JSON Stack Hardening**: Implemented recursive depth tracking in JSON printing to mitigate stack overflow DoS attacks (v1.5.6).
+- **XOR Cipher Specialization**: Features expanded specialization for 1, 2, 4, 8, and 16-byte keys using 64-bit word-sized XOR operations (SWAR) for extreme performance (v1.5.7).
+- **Thread Pool Race Mitigation**: Hardened `vibe_thread_pool_create` by moving the shutdown signal within the mutex lock to prevent initialization-phase data races (v1.5.8).
+- **Hardened JSON Serialization**: Updated `vibe_json_print` to use internal hardened macros, ensuring all output follows security audit requirements (v1.5.8).
 - **Regex NULL Safety**: Implemented NULL pointer checks in `vibe_regex_match` to prevent application crashes (v1.5.2).
 - **Optimized XOR Cipher**: Replaced modulo operator with incremental indexing in `vibe_xor_cipher` for significantly improved performance (v1.5.2).
 - **Secure JSON Printing**: Built-in JSON printing with full control character escaping and high-performance chunked I/O (v1.4.7).

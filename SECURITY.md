@@ -1,8 +1,8 @@
 # Security Policy
 
-## Security Audit (v1.5.2)
+## Security Audit (v1.5.8)
 
-A comprehensive security audit has been performed on the Vibe C Compiler v1.5.2 core and its custom headers.
+A comprehensive security audit has been performed on the Vibe C Compiler v1.5.8 core and its custom headers.
 
 ### Core Compiler Logic
 - **Input Validation**: All user-provided inputs (project names, templates, architectures) are now strictly validated against regex patterns across all commands (`init`, `build`, `run`, `test`, `status`, etc.) to mitigate path traversal and argument injection.
@@ -21,8 +21,8 @@ A comprehensive security audit has been performed on the Vibe C Compiler v1.5.2 
 - **JSON Security**: `vibe_json.h` implements secure printing with full control character escaping (U+0000 to U+001F) to prevent injection and ensures robustness with NULL pointer checks (v1.4.7).
 - **Network Security**: `vibe_net.h` implements zero-initialization of `sockaddr_in` structures to prevent stack memory leakage and uses `SOMAXCONN` as the default backlog to mitigate connection exhaustion DoS attacks (v1.5.0).
 - **Regex Safety**: `vibe_regex.h` implements NULL pointer checks to prevent crashes when processing unvalidated inputs (v1.5.2).
-- **Thread Pool Hardening**: `vibe_thread_pool.h` enforces a 1024 thread limit and includes shutdown-aware job rejection to mitigate DoS and prevent memory leaks (v1.5.5).
-- **Library Robustness**: Core headers include NULL pointer checks for increased stability (v1.4.7-v1.5.5).
+- **Thread Pool Hardening**: `vibe_thread_pool.h` enforces a 1024 thread limit, includes shutdown-aware job rejection, and mitigates initialization-phase races (v1.5.8).
+- **Library Robustness**: Core headers include NULL pointer checks, recursive depth tracking, and hardened I/O macros for increased stability and security (v1.4.7-v1.5.8).
 - **Cryptography**: `vibe_crypt.h` provides a simple XOR cipher which is intended for obfuscation and educational purposes only. It is **not** suitable for securing sensitive data against determined attackers.
 
 ## Reporting a Vulnerability

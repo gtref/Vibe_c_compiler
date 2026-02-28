@@ -1,6 +1,6 @@
 /**
  * This header provides networking utilities for TCP listening and connecting in the Vibe C library.
- * In version 1.5.6, it continues to provide hardened socket structures and SOMAXCONN backlogs.
+ * In version 1.5.8, it continues to provide hardened socket structures and SOMAXCONN backlogs.
  * This code is AI-generated.
  */
 #ifndef VIBE_NET_H

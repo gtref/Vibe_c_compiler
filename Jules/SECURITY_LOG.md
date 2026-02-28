@@ -2,6 +2,21 @@
 
 This log tracks all security-related changes and audits performed on the Vibe C Compiler.
 
+## [1.5.8] - 2026-08-10
+
+### Security Improvements & Fixes
+- **Thread Pool Race Mitigation**: (Sentinel 🛡️) Hardened pool initialization by ensuring shutdown signaling is performed while holding the mutex.
+- **Hardened JSON Printing**: (Sentinel 🛡️) Switched JSON printing from raw `printf` to hardened `vibe_print` macros to enforce compile-time format string literal checks.
+
+### Verification
+- Verified thread pool error handling logic.
+- Verified JSON printing output with hardened macros.
+
+## [1.5.7] - 2026-07-25
+
+### Security Improvements & Fixes
+- **XOR Specialization**: (Bolt ⚡) Optimized the XOR hot loop for common key sizes using word-sized operations.
+
 ## [1.5.2] - 2026-06-22
 
 ### Security Improvements & Fixes

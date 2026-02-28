@@ -1,6 +1,6 @@
 /**
  * This header provides basic I/O macros for the Vibe C library with compile-time security hardening.
- * In version 1.5.6, the macros continue to enforce string literal format strings to prevent injection vulnerabilities.
+ * In version 1.5.8, the macros continue to enforce string literal format strings to prevent injection vulnerabilities.
  * This code is AI-generated.
  */
 #ifndef VIBE_IO_H

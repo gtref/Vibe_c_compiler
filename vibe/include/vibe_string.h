@@ -1,6 +1,6 @@
 /**
  * This header provides secure string comparison utilities for the Vibe C library.
- * In version 1.5.6, the constant-time comparison has been hardened to avoid leaking individual string lengths.
+ * In version 1.5.8, the constant-time comparison has been hardened to avoid leaking individual string lengths.
  * This code is AI-generated.
  */
 #ifndef VIBE_STRING_H

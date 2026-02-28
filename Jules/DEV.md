@@ -5,6 +5,15 @@ This log tracks major changes and improvements made to the Vibe C Compiler suite
 
 ## Change-log
 
+### [1.5.8] - 2026-08-10
+#### Added
+- **Thread Pool Hardening**: (Sentinel 🛡️) Mitigated a potential data race in `vibe_thread_pool_create` by moving shutdown signaling inside the mutex lock.
+- **JSON Printing Hardening**: (Sentinel 🛡️) Refactored `vibe_json_print` to use hardened `vibe_print` macros instead of raw `printf`.
+
+### [1.5.7] - 2026-07-25
+#### Added
+- **XOR Specialization**: (Bolt ⚡) Implemented 64-bit word-sized (SWAR) specializations for 1, 2, 4, 8, and 16-byte keys in `vibe_xor_cipher`.
+
 ### [1.5.2] - 2026-06-22
 #### Added
 - **Regex NULL Safety**: (Sentinel 🛡️) Added NULL pointer checks to `vibe_regex_match` in `vibe_regex.h` to prevent crashes when processing unvalidated input.

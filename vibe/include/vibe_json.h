@@ -1,6 +1,6 @@
 /**
  * This header implements high-performance and secure JSON serialization for the Vibe C library.
- * In version 1.5.6, it has been enhanced with recursive depth tracking to mitigate stack overflow attacks.
+ * In version 1.5.8, it uses hardened printing macros and enforces strict recursive depth tracking.
  * This code is AI-generated.
  */
 #ifndef VIBE_JSON_H
@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <math.h>
+#include "vibe_io.h"
 
 // Sentinel: Default maximum depth for recursive JSON printing to mitigate stack overflow DoS.
 #ifndef VIBE_JSON_MAX_DEPTH
@@ -139,11 +140,12 @@ static inline void _vibe_json_print_recursive(vibe_json_value_t* v, int depth) {
                 fputs("null", stdout);
             }
             // BOLT: Fast path for integers to avoid slow %g formatter (~5x speedup)
-            // Checks if number is an integer and fits within a safe 64-bit range
+            // Checks if number is an integer and fits within a safe 64-bit range.
+            // Sentinel: Uses vibe_print macro for hardened format string literal enforcement.
             else if (n >= -9e18 && n <= 9e18 && n == (long long)n) {
-                printf("%lld", (long long)n);
+                vibe_print("%lld", (long long)n);
             } else {
-                printf("%g", n);
+                vibe_print("%g", n);
             }
             break;
         }

@@ -1,6 +1,6 @@
 /**
  * This header provides cryptographic primitives, including an optimized XOR cipher and DJB2 hashing.
- * In version 1.5.7, the XOR cipher features expanded specialization for 1, 2, 4, 8, and 16-byte keys.
+ * In version 1.5.8, the XOR cipher features expanded specialization for 1, 2, 4, 8, and 16-byte keys.
  * This code is AI-generated.
  */
 #ifndef VIBE_CRYPT_H

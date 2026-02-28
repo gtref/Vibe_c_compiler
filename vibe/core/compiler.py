@@ -1,6 +1,6 @@
 """
 This module implements the core Vibe C Compiler logic, handling project initialization, parallel compilation, and security auditing.
-In version 1.5.6, the security audit and core headers have been enhanced with hardened constant-time string comparison and JSON depth tracking.
+In version 1.5.8, it supports hardened thread pools and secure JSON serialization across the entire Vibe library suite.
 This code is AI-generated.
 """
 

@@ -1,5 +1,25 @@
 # Sentinel Security Log 🛡️
 
+## 2026-08-10 - [1.5.8] - Thread Pool Race Mitigation and JSON Hardening
+
+### 🔍 Found
+- **Initialization Race Condition**: In `vibe_thread_pool_create`, the `pool->shutdown` flag was set outside the mutex lock during error handling, potentially allowing worker threads to enter an inconsistent state.
+- **Unhardened JSON Output**: The `vibe_json_print` function was still using raw `printf` instead of the hardened `vibe_print` macros, violating the project's security audit requirements for format string protection.
+
+### 🎯 Impact
+- **Thread Instability**: Rare race conditions during pool initialization failure could lead to deadlocks or crashes.
+- **Security Audit Failure**: Use of unhardened I/O functions in core headers increased the potential risk of format string injection.
+
+### 🔧 Fix
+- **Atomic Shutdown Signal**: Moved `pool->shutdown = true` inside the mutex lock in `vibe_thread_pool_create`'s error path to ensure atomic state updates.
+- **Hardened Serialization**: Included `vibe_io.h` in `vibe_json.h` and replaced all number-printing `printf` calls with `vibe_print` to leverage compile-time format string hardening.
+- **Version Update**: Incremented project version to 1.5.8 and synchronized all source file headers.
+
+### ✅ Verification
+- Verified code changes in `vibe_thread_pool.h` and `vibe_json.h`.
+- Confirmed project-wide version consistency.
+- Ran full test suite using `vcc test` to ensure no regressions in JSON printing or thread pool management.
+
 ## 2026-07-25 - [1.5.7] - XOR Cipher Specialization and Version Update
 
 ### 🔍 Found
