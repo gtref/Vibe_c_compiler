@@ -115,6 +115,7 @@ Vibe C features a high-performance build system optimized for developer producti
 - **Parallelized Security Audit**: The security audit system is parallelized across multiple cores for rapid project-wide scanning, including internal header checks (v1.4.8).
 - **High-Performance JSON Printing**: Optimized with chunked I/O to significantly reduce system call overhead when printing strings (v1.4.7).
 - **Optimized XOR Cipher**: Uses incremental indexing instead of the modulo operator to maximize throughput in the XOR hot loop (v1.5.2).
+- **Optimized Hashing**: Implements a high-performance SWAR (SIMD Within A Register) approach for DJB2 string hashing (v1.5.8).
 - **Incremental Builds & Tests**: Automatically detects changed source, headers, and libraries to only recompile and rerun what is necessary.
 - **Binary Hardening**: Automatically applies comprehensive security hardening flags (e.g., Stack Protector, PIE, RELRO) to all compilation and linking steps (v1.4.5).
 - **Thread Pool Robustness**: `vibe_thread_pool.h` includes comprehensive error handling for `malloc` and `pthread` failures, with atomic cleanup logic to prevent resource leaks (v1.5.1).

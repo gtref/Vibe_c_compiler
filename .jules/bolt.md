@@ -71,3 +71,11 @@
 ## 2026-07-25 - [Multiplication-based Mask Replication]
 **Learning:** Using constant multiplication (e.g., `0x0001000100010001ULL * k`) is an extremely efficient way to replicate 1-byte or 2-byte keys into a 64-bit word for SWAR operations, replacing multiple shifts and ORs. Furthermore, specializing for 16-byte keys by processing two 64-bit blocks in parallel yields ~12x speedup by eliminating the modulo/indexing overhead in the hot loop.
 **Action:** Use multiplication tricks for fast mask preparation and specialize hot loops for any common fixed-size inputs, even if they exceed a single machine word.
+
+## 2026-08-05 - SWAR for String Hashing (DJB2)
+**Learning:** Optimizing byte-by-byte algorithms like DJB2 using SWAR (SIMD Within A Register) can yield significant performance gains (~25% on modern CPUs). The key is using word-sized loads (64-bit) combined with high-speed zero-byte detection (e.g., `(v - 0x01...ULL) & ~v & 0x80...ULL`) to process data in blocks while safely identifying the string terminator. Unrolling the hash calculation within the word avoids branching and leverages the CPU's execution pipeline.
+**Action:** For string-processing algorithms that are bottlenecks, consider a SWAR approach with word-sized loads and efficient null-terminator detection.
+
+## 2026-08-06 - Endianness in SWAR Optimizations
+**Learning:** Using bitwise shifts to extract bytes from a word loaded via `uint64_t*` is endian-dependent. On Little Endian systems, `v >> 0` is the first byte in memory, but on Big Endian systems, it would be the last. To maintain hash consistency across architectures while still using word-sized loads for speed, it is safer to access the loaded word through a `const unsigned char*` cast.
+**Action:** Always ensure that SWAR optimizations that process individual bytes from a word are endian-neutral, preferably by using memory-order consistent access (like a byte pointer) rather than architecture-dependent shifts.

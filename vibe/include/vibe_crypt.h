@@ -1,6 +1,6 @@
 /**
  * This header provides cryptographic primitives, including an optimized XOR cipher and DJB2 hashing.
- * In version 1.5.7, the XOR cipher features expanded specialization for 1, 2, 4, 8, and 16-byte keys.
+ * In version 1.5.8, the DJB2 hashing has been optimized using a SWAR approach to process 8 bytes at a time.
  * This code is AI-generated.
  */
 #ifndef VIBE_CRYPT_H
@@ -124,13 +124,47 @@ static inline void vibe_xor_cipher(uint8_t* data, size_t len, const uint8_t* key
 /**
  * vibe_simple_hash - A very simple non-cryptographic hash (DJB2)
  * Internal Logic: Classic DJB2 hash algorithm using bit shifts and additions.
+ * BOLT: Optimized using SWAR (SIMD Within A Register) to process 8 bytes at a time.
  */
 static inline uint64_t vibe_simple_hash(const char* str) {
     if (!str) return 0;
     uint64_t hash = 5381;
-    int c;
-    while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
+    const unsigned char* p = (const unsigned char*)str;
+
+    // BOLT: Align to 8 bytes to avoid unaligned access penalties and enable word-sized loads.
+    while (((uintptr_t)p & 7) != 0) {
+        if (!*p) return hash;
+        hash = (hash << 5) + hash + *p++;
+    }
+
+    // BOLT: Process 8 bytes at a time using SWAR zero-byte detection.
+    const uint64_t* p8 = (const uint64_t*)p;
+    while (1) {
+        uint64_t v = *p8;
+        // BOLT: High-speed zero byte detection (Hacker's Delight)
+        if ((v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL) {
+            break;
+        }
+
+        // BOLT: Process 8 bytes from the word in a memory-order consistent way (endian-neutral).
+        // This maintains the same hash result regardless of CPU endianness while using a word-sized load.
+        const unsigned char* b = (const unsigned char*)p8;
+        hash = (hash << 5) + hash + b[0];
+        hash = (hash << 5) + hash + b[1];
+        hash = (hash << 5) + hash + b[2];
+        hash = (hash << 5) + hash + b[3];
+        hash = (hash << 5) + hash + b[4];
+        hash = (hash << 5) + hash + b[5];
+        hash = (hash << 5) + hash + b[6];
+        hash = (hash << 5) + hash + b[7];
+
+        p8++;
+    }
+
+    // BOLT: Handle remaining bytes after the last full word.
+    p = (const unsigned char*)p8;
+    while (*p) {
+        hash = (hash << 5) + hash + *p++;
     }
     return hash;
 }
