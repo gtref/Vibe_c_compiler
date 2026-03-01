@@ -71,3 +71,7 @@
 ## 2026-07-25 - [Multiplication-based Mask Replication]
 **Learning:** Using constant multiplication (e.g., `0x0001000100010001ULL * k`) is an extremely efficient way to replicate 1-byte or 2-byte keys into a 64-bit word for SWAR operations, replacing multiple shifts and ORs. Furthermore, specializing for 16-byte keys by processing two 64-bit blocks in parallel yields ~12x speedup by eliminating the modulo/indexing overhead in the hot loop.
 **Action:** Use multiplication tricks for fast mask preparation and specialize hot loops for any common fixed-size inputs, even if they exceed a single machine word.
+
+## 2026-08-01 - [SWAR for High-Throughput Hashing]
+**Learning:** Traditional character-by-character hashing (like DJB2) suffers from significant branch and induction overhead on large strings. Implementing a SWAR (SIMD Within A Register) loop to process 8 bytes at a time with word-sized loads and high-speed zero-byte detection (`(v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL`) can significantly improve throughput (~17-25% speedup observed). Accessing the loaded word through an `unsigned char*` cast provides a portable, endian-neutral way to extract bytes while maintaining high performance.
+**Action:** In string processing hot paths, use word-sized loads and SWAR zero-byte detection to process multiple characters in parallel and reduce branching.
