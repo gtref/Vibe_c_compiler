@@ -1,6 +1,6 @@
 /**
  * This header provides networking utilities for TCP listening and connecting in the Vibe C library.
- * In version 1.5.6, it continues to provide hardened socket structures and SOMAXCONN backlogs.
+ * In version 1.5.9, it provides hardened socket structures, SOMAXCONN backlogs, and resource isolation.
  * This code is AI-generated.
  */
 #ifndef VIBE_NET_H
@@ -11,14 +11,30 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 /**
  * vibe_net_listen - Creates a TCP server socket listening on the specified port.
  * Internal Logic: Binds to INADDR_ANY and uses SOMAXCONN for the listen backlog to mitigate DoS.
+ * In version 1.5.9, added port validation, SO_REUSEADDR, and FD_CLOEXEC for security.
  */
 static inline int vibe_net_listen(int port) {
+    if (port < 0 || port > 65535) return -1;
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) return -1;
+
+    // Internal Logic: Set SO_REUSEADDR to allow immediate restart and prevent DoS.
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        close(server_fd);
+        return -1;
+    }
+
+    // Internal Logic: Set FD_CLOEXEC to prevent file descriptor leakage to child processes.
+    if (fcntl(server_fd, F_SETFD, FD_CLOEXEC) < 0) {
+        close(server_fd);
+        return -1;
+    }
 
     // Internal Logic: Zero-initialize sockaddr_in to prevent information leakage from stack data.
     struct sockaddr_in address = {0};
@@ -42,11 +58,18 @@ static inline int vibe_net_listen(int port) {
 /**
  * vibe_net_connect - Connects to a remote TCP server.
  * Internal Logic: Performs DNS-less connection using inet_pton and standard POSIX connect.
+ * In version 1.5.9, added port validation and FD_CLOEXEC for security.
  */
 static inline int vibe_net_connect(const char* ip, int port) {
-    if (!ip) return -1;
+    if (!ip || port < 0 || port > 65535) return -1;
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) return -1;
+
+    // Internal Logic: Set FD_CLOEXEC to prevent file descriptor leakage to child processes.
+    if (fcntl(sock, F_SETFD, FD_CLOEXEC) < 0) {
+        close(sock);
+        return -1;
+    }
 
     // Internal Logic: Zero-initialize sockaddr_in to prevent information leakage.
     struct sockaddr_in serv_addr = {0};

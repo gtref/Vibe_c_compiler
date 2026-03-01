@@ -77,3 +77,8 @@
 **Vulnerability:** Unbounded thread creation, unbounded job queuing, and unchecked job queuing during shutdown in the thread pool.
 **Learning:** Concurrency primitives must enforce limits on ALL resources they manage (both threads and memory/queue size) to prevent Denial of Service. Lifecycle state must be checked atomically at all entry points to ensure consistent behavior and prevent leaks.
 **Prevention:** Implement strict upper bounds on both worker counts and queue depths. Always verify the current operational state (e.g., shutdown status) while holding the necessary synchronization locks before accepting new work.
+
+## 2026-08-15 - [1.5.9] - Networking Robustness and Resource Isolation
+**Vulnerability:** Incomplete networking security (missing port validation, no FD_CLOEXEC, no SO_REUSEADDR) and resource leaks in error paths.
+**Learning:** Hardening core utilities requires addressing both external security (resource isolation, DoS) and internal robustness (resource management on failure). Sockets should be marked with FD_CLOEXEC and error paths must explicitly close descriptors to prevent exhaustion.
+**Prevention:** Always validate numeric ranges for system parameters (like ports) and ensure all resources (file descriptors, memory) are correctly released in all execution paths, including error returns.

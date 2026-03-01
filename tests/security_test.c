@@ -1,6 +1,6 @@
 /**
- * This test suite verifies the security features of the Vibe C library, including NULL pointer safety and constant-time comparison.
- * In version 1.5.6, the constant-time comparison has been hardened and is verified here.
+ * This test suite verifies the security features of the Vibe C library, including networking input validation.
+ * In version 1.5.9, the networking utilities have been hardened and are verified here.
  * This code is AI-generated.
  */
 #include <vibe_std.h>
@@ -9,6 +9,7 @@
 #include <vibe_test.h>
 #include <vibe_json.h>
 #include <vibe_regex.h>
+#include <vibe_net.h>
 
 /**
  * test_null_checks - Verifies that core functions correctly handle NULL inputs.
@@ -75,10 +76,23 @@ void test_xor_cipher() {
     }
 }
 
+/**
+ * test_net_validation - Verifies that networking functions correctly validate inputs.
+ */
+void test_net_validation() {
+    // Internal Logic: Ensure invalid port numbers are rejected.
+    VIBE_ASSERT(vibe_net_listen(-1) == -1);
+    VIBE_ASSERT(vibe_net_listen(65536) == -1);
+    VIBE_ASSERT(vibe_net_connect("127.0.0.1", -1) == -1);
+    VIBE_ASSERT(vibe_net_connect("127.0.0.1", 65536) == -1);
+    VIBE_ASSERT(vibe_net_connect(NULL, 8080) == -1);
+}
+
 int main() {
     test_null_checks();
     test_constant_time_eq();
     test_xor_cipher();
+    test_net_validation();
     VIBE_TEST_SUMMARY();
     return 0;
 }
