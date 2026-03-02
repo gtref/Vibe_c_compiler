@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 This is the main entry point script for the Vibe C Compiler suite.
-In version 1.5.8, it ensures proper environment setup by adding the repository root to the Python path.
+In version 1.5.9, it ensures proper environment setup by adding the repository root to the Python path.
 This code is AI-generated.
 """
 import sys

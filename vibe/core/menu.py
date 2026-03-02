@@ -1,6 +1,6 @@
 """
 This module provides an interactive terminal-based menu (TUI) for the Vibe C Compiler.
-In version 1.5.8, it provides easy access to the hardened build system, parallel test runner, and security auditing tools.
+In version 1.5.9, it provides easy access to the hardened build system, parallel test runner, and security auditing tools.
 This code is AI-generated.
 """
 

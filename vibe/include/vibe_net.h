@@ -1,6 +1,6 @@
 /**
  * This header provides networking utilities for TCP listening and connecting in the Vibe C library.
- * In version 1.5.8, it features zero-initialization of structures and increased SOMAXCONN backlogs for better security.
+ * In version 1.5.9, it features port range validation, SO_REUSEADDR for immediate restarts, and FD_CLOEXEC for security.
  * This code is AI-generated.
  */
 #ifndef VIBE_NET_H
@@ -11,15 +11,33 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 /**
  * vibe_net_listen - Creates a TCP server socket listening on the specified port.
  * Internal Logic: Binds to INADDR_ANY and uses SOMAXCONN for the listen backlog to mitigate DoS.
+ * Implements port range validation and sets SO_REUSEADDR and FD_CLOEXEC for robustness and security.
  */
 static inline int vibe_net_listen(int port) {
+    // Sentinel: Validate port range to prevent invalid socket operations.
+    if (port < 0 || port > 65535) return -1;
+
     // Internal Logic: Open a new TCP socket using the AF_INET domain.
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) return -1;
+
+    // Sentinel: Set SO_REUSEADDR to allow immediate restart of the server on the same port.
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        close(server_fd);
+        return -1;
+    }
+
+    // Sentinel: Set FD_CLOEXEC to prevent the file descriptor from being inherited by child processes.
+    int flags = fcntl(server_fd, F_GETFD);
+    if (flags != -1) {
+        fcntl(server_fd, F_SETFD, flags | FD_CLOEXEC);
+    }
 
     // Internal Logic: Zero-initialize sockaddr_in to prevent leaking uninitialized stack data to the kernel.
     struct sockaddr_in address = {0};
@@ -44,12 +62,21 @@ static inline int vibe_net_listen(int port) {
 /**
  * vibe_net_connect - Connects to a remote TCP server.
  * Internal Logic: Performs DNS-less connection using inet_pton and standard POSIX connect.
+ * Implements port range validation and sets FD_CLOEXEC for security.
  */
 static inline int vibe_net_connect(const char* ip, int port) {
-    // Internal Logic: Validate IP input and initialize the socket for connection.
-    if (!ip) return -1;
+    // Sentinel: Validate port range and IP pointer to prevent crashes or invalid operations.
+    if (!ip || port < 0 || port > 65535) return -1;
+
+    // Internal Logic: Open a new TCP socket using the AF_INET domain.
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) return -1;
+
+    // Sentinel: Set FD_CLOEXEC to prevent the file descriptor from being inherited by child processes.
+    int flags = fcntl(sock, F_GETFD);
+    if (flags != -1) {
+        fcntl(sock, F_SETFD, flags | FD_CLOEXEC);
+    }
 
     // Internal Logic: Zero-initialize the server address structure to maintain security and consistency.
     struct sockaddr_in serv_addr = {0};

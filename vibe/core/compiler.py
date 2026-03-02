@@ -1,6 +1,6 @@
 """
 This module implements the core Vibe C Compiler logic, handling project initialization, parallel compilation, and security auditing.
-In version 1.5.8, the compiler features enhanced performance for directory traversal and hardened security patterns for the internal audit tool.
+In version 1.5.9, the compiler features non-recursive directory traversals and optimized threading logic for improved efficiency.
 This code is AI-generated.
 """
 
@@ -219,25 +219,28 @@ class VibeCompiler:
         obj_root = os.path.join("build", "obj")
         os.makedirs(obj_root, exist_ok=True)
 
-        # BOLT: Collect all source files and determine the latest header modification time in a single pass.
+        # BOLT: Collect all source files and determine the latest header modification time in a single pass using non-recursive traversal.
         src_files = []
         header_mtime = self._get_header_mtime(scan_src=False)
 
-        def _collect_src(path, rel_root=""):
+        def _collect_src(root_path):
             nonlocal header_mtime
-            try:
-                for entry in os.scandir(path):
-                    if entry.is_file():
-                        if entry.name.endswith(".c"):
-                            rel_path = os.path.join(rel_root, entry.name)
-                            obj_path = os.path.join(obj_root, os.path.splitext(rel_path)[0] + ".o")
-                            src_files.append((entry.path, obj_path, entry.stat().st_mtime))
-                        elif entry.name.endswith(".h"):
-                            header_mtime = max(header_mtime, entry.stat().st_mtime)
-                    elif entry.is_dir(follow_symlinks=False):
-                        _collect_src(entry.path, os.path.join(rel_root, entry.name))
-            except OSError as e:
-                print(f"Warning: Could not scan source directory '{path}': {e}")
+            stack = [(root_path, "")]
+            while stack:
+                curr_path, rel_root = stack.pop()
+                try:
+                    for entry in os.scandir(curr_path):
+                        if entry.is_file():
+                            if entry.name.endswith(".c"):
+                                rel_path = os.path.join(rel_root, entry.name)
+                                obj_path = os.path.join(obj_root, os.path.splitext(rel_path)[0] + ".o")
+                                src_files.append((entry.path, obj_path, entry.stat().st_mtime))
+                            elif entry.name.endswith(".h"):
+                                header_mtime = max(header_mtime, entry.stat().st_mtime)
+                        elif entry.is_dir(follow_symlinks=False):
+                            stack.append((entry.path, os.path.join(rel_root, entry.name)))
+                except OSError as e:
+                    print(f"Warning: Could not scan source directory '{curr_path}': {e}")
 
         if os.path.exists("src"):
             _collect_src("src")
@@ -259,17 +262,20 @@ class VibeCompiler:
             print(f"Error: Invalid architecture name '{arch}'.")
             return False
 
-        # BOLT: Cache object file modification times to speed up the incremental check.
+        # BOLT: Cache object file modification times using a non-recursive scan.
         obj_mtimes = {}
-        def _collect_obj_mtimes(path):
-            try:
-                for entry in os.scandir(path):
-                    if entry.is_file() and entry.name.endswith(".o"):
-                        obj_mtimes[entry.path] = entry.stat().st_mtime
-                    elif entry.is_dir(follow_symlinks=False):
-                        _collect_obj_mtimes(entry.path)
-            except OSError:
-                pass
+        def _collect_obj_mtimes(root_path):
+            stack = [root_path]
+            while stack:
+                curr_path = stack.pop()
+                try:
+                    for entry in os.scandir(curr_path):
+                        if entry.is_file() and entry.name.endswith(".o"):
+                            obj_mtimes[entry.path] = entry.stat().st_mtime
+                        elif entry.is_dir(follow_symlinks=False):
+                            stack.append(entry.path)
+                except OSError:
+                    pass
         _collect_obj_mtimes(obj_root)
 
         # BOLT: Identify which source files actually need recompilation based on mtime logic.
@@ -287,17 +293,21 @@ class VibeCompiler:
 
         link_needed = not os.path.exists(output_name)
 
-        # BOLT: Execute compilation tasks in parallel using a ThreadPoolExecutor for efficiency.
+        # BOLT: Execute compilation tasks. Skip ThreadPoolExecutor for a single file to reduce overhead.
         if to_compile:
             obj_dirs = {os.path.dirname(obj) for _, obj in to_compile}
             for d in obj_dirs:
                 os.makedirs(d, exist_ok=True)
 
-            with ThreadPoolExecutor() as executor:
-                results = list(executor.map(lambda x: self._compile_src(x[0], x[1], arch, proj_type), to_compile))
-                if None in results:
-                    print("Build failed: Some files failed to compile.")
-                    return False
+            if len(to_compile) == 1:
+                results = [self._compile_src(to_compile[0][0], to_compile[0][1], arch, proj_type)]
+            else:
+                with ThreadPoolExecutor() as executor:
+                    results = list(executor.map(lambda x: self._compile_src(x[0], x[1], arch, proj_type), to_compile))
+
+            if None in results:
+                print("Build failed: Some files failed to compile.")
+                return False
             link_needed = True
 
         if not obj_files:
@@ -374,17 +384,20 @@ class VibeCompiler:
             print("No tests/ directory found.")
             return
 
-        # BOLT: Efficiently collect all C test files using a non-recursive scan.
+        # BOLT: Efficiently collect all C test files using a non-recursive, stack-based scan.
         test_files = []
-        def _collect_tests(path):
-            try:
-                for entry in os.scandir(path):
-                    if entry.is_file() and entry.name.endswith(".c"):
-                        test_files.append((entry.path, entry.stat().st_mtime))
-                    elif entry.is_dir(follow_symlinks=False):
-                        _collect_tests(entry.path)
-            except OSError as e:
-                print(f"Warning: Could not scan test directory '{path}': {e}")
+        def _collect_tests(root_path):
+            stack = [root_path]
+            while stack:
+                curr_path = stack.pop()
+                try:
+                    for entry in os.scandir(curr_path):
+                        if entry.is_file() and entry.name.endswith(".c"):
+                            test_files.append((entry.path, entry.stat().st_mtime))
+                        elif entry.is_dir(follow_symlinks=False):
+                            stack.append(entry.path)
+                except OSError as e:
+                    print(f"Warning: Could not scan test directory '{curr_path}': {e}")
         _collect_tests("tests")
 
         if not test_files:
@@ -451,6 +464,7 @@ class VibeCompiler:
             except OSError:
                 pass
 
+        # BOLT: Identify which tests need recompilation and pre-calculate metadata to reduce overhead.
         to_compile = []
         compilation_results = []
         for test_file, test_mtime in test_files:
@@ -461,17 +475,24 @@ class VibeCompiler:
             if bin_mtime is not None:
                 if bin_mtime > test_mtime and bin_mtime > header_mtime and bin_mtime > lib_mtime:
                     needs_compile = False
-            if needs_compile:
-                to_compile.append(test_file)
-            else:
-                compilation_results.append({"file": test_file, "name": test_name, "bin": output_bin, "success": True, "error": ""})
 
-        # BOLT: Compile and then run tests concurrently using ThreadPoolExecutor.
+            metadata = {"file": test_file, "name": test_name, "bin": output_bin}
+            if needs_compile:
+                to_compile.append(metadata)
+            else:
+                metadata.update({"success": True, "error": ""})
+                compilation_results.append(metadata)
+
+        # BOLT: Compile tests. Skip ThreadPoolExecutor for single-test builds to minimize overhead.
         if to_compile:
-            print(f"Compiling {len(to_compile)} tests in parallel...")
-            compile_args = [(tf, os.path.join(test_bin_dir, os.path.splitext(os.path.basename(tf))[0])) for tf in to_compile]
-            with ThreadPoolExecutor() as executor:
-                compilation_results.extend(list(executor.map(lambda x: _compile_test(x[0], x[1]), compile_args)))
+            if len(to_compile) == 1:
+                print(f"Compiling {to_compile[0]['file']}...")
+                compilation_results.append(_compile_test(to_compile[0]['file'], to_compile[0]['bin']))
+            else:
+                print(f"Compiling {len(to_compile)} tests in parallel...")
+                compile_args = [(tc['file'], tc['bin']) for tc in to_compile]
+                with ThreadPoolExecutor() as executor:
+                    compilation_results.extend(list(executor.map(lambda x: _compile_test(x[0], x[1]), compile_args)))
 
         print(f"Running {len(compilation_results)} tests in parallel...")
         # Sentinel: Sanitize LD_LIBRARY_PATH to prevent unintended library loading during tests.
@@ -650,14 +671,19 @@ class VibeCompiler:
                         elif entry.is_dir(follow_symlinks=False): stack.append(entry.path)
                 except OSError: pass
 
-        # BOLT: Distribute audit tasks across threads and summarize findings.
+        # BOLT: Distribute audit tasks. Skip ThreadPoolExecutor for small projects to reduce overhead.
         if files_to_audit:
             issues_found = 0
-            with ThreadPoolExecutor() as executor:
-                for file_issues in executor.map(self._audit_file, files_to_audit):
-                    for issue in file_issues:
-                        print(issue)
-                        issues_found += 1
+            if len(files_to_audit) == 1:
+                results = [self._audit_file(files_to_audit[0])]
+            else:
+                with ThreadPoolExecutor() as executor:
+                    results = list(executor.map(self._audit_file, files_to_audit))
+
+            for file_issues in results:
+                for issue in file_issues:
+                    print(issue)
+                    issues_found += 1
             print(f"  Found {issues_found} potential issues.")
         else:
             print("  No relevant files found.")

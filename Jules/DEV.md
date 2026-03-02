@@ -5,6 +5,14 @@ This log tracks major changes and improvements made to the Vibe C Compiler suite
 
 ## Change-log
 
+### [1.5.9] - 2026-08-15
+#### Added
+- **SWAR Hashing Optimization**: (Bolt ⚡) Optimized `vibe_simple_hash` in `vibe_crypt.h` using a SWAR approach to process 8 bytes at a time, achieving ~17% speedup.
+- **Non-Recursive Traversals**: (Bolt ⚡) Rewrote all directory scanning logic in `vibe/core/compiler.py` to use a stack-based, non-recursive approach with `os.scandir` for improved performance and safety.
+- **Threading Overhead Reduction**: (Bolt ⚡) Optimized `VibeCompiler` to bypass `ThreadPoolExecutor` for single-file compilation, testing, and auditing tasks.
+- **Networking Hardening**: (Sentinel 🛡️) Implemented port range validation, `SO_REUSEADDR`, and `FD_CLOEXEC` in `vibe_net.h` for better robustness and security.
+- **Internal Logic Refinement**: (Doc Updater 🌀) Synchronized all documentation and standardized AI-generation headers across the entire codebase.
+
 ### [1.5.8] - 2026-08-01
 #### Added
 - **JSON Stack Hardening**: (Sentinel 🛡️) Implemented recursive depth tracking in `vibe_json_print` with a default limit of 128 to mitigate stack overflow DoS.

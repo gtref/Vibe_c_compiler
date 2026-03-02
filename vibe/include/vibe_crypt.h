@@ -1,6 +1,6 @@
 /**
- * This header provides cryptographic primitives, including an optimized XOR cipher and DJB2 hashing.
- * In version 1.5.8, the XOR cipher features expanded specialization for 1, 2, 4, 8, and 16-byte keys using SWAR techniques.
+ * This header provides cryptographic primitives, including an optimized XOR cipher and high-performance SWAR-based DJB2 hashing.
+ * In version 1.5.9, the hashing function was optimized to process 8 bytes at a time using word-sized loads and bitmask-based null detection.
  * This code is AI-generated.
  */
 #ifndef VIBE_CRYPT_H
@@ -125,17 +125,49 @@ static inline void vibe_xor_cipher(uint8_t* data, size_t len, const uint8_t* key
 }
 
 /**
- * vibe_simple_hash - A very simple non-cryptographic hash (DJB2)
- * Internal Logic: Classic DJB2 hash algorithm using bit shifts and additions for high-speed string hashing.
+ * vibe_simple_hash - A high-performance non-cryptographic hash (DJB2) using SWAR.
+ * Internal Logic: Implements a SWAR (SIMD Within A Register) version of DJB2 that processes 8 bytes at a time.
+ * It uses word-sized loads and a non-branching bitmask trick to detect null terminators within a 64-bit word.
  */
 static inline uint64_t vibe_simple_hash(const char* str) {
     // Internal Logic: Check for NULL input to prevent segmentation faults during hashing.
     if (!str) return 0;
     uint64_t hash = 5381;
-    int c;
-    while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
+
+    // BOLT: Process 8 bytes at a time using SWAR if the string is sufficiently long.
+    const unsigned char* p = (const unsigned char*)str;
+    while (((uintptr_t)p & 7) != 0) {
+        if (*p == '\0') return hash;
+        hash = ((hash << 5) + hash) + *p++;
     }
+
+    while (1) {
+        uint64_t v;
+        memcpy(&v, p, 8);
+
+        // BOLT: Use a non-branching bitmask trick to detect the first null byte in a 64-bit word.
+        // The formula (v - 0x01...01) & ~v & 0x80...80 identifies bytes where the high bit is set after subtraction.
+        uint64_t has_zero = (v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL;
+
+        if (has_zero) break;
+
+        // BOLT: Portable, endian-neutral byte extraction from the 64-bit word.
+        hash = ((hash << 5) + hash) + p[0];
+        hash = ((hash << 5) + hash) + p[1];
+        hash = ((hash << 5) + hash) + p[2];
+        hash = ((hash << 5) + hash) + p[3];
+        hash = ((hash << 5) + hash) + p[4];
+        hash = ((hash << 5) + hash) + p[5];
+        hash = ((hash << 5) + hash) + p[6];
+        hash = ((hash << 5) + hash) + p[7];
+        p += 8;
+    }
+
+    // BOLT: Handle remaining bytes after the last full 64-bit word or if a zero was detected.
+    while (*p) {
+        hash = ((hash << 5) + hash) + *p++;
+    }
+
     return hash;
 }
 

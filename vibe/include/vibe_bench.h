@@ -1,6 +1,6 @@
 /**
  * This header provides a simple benchmarking utility for measuring the execution time of code blocks.
- * In version 1.5.8, the benchmarking macro has been updated for better timing accuracy using the monotonic clock.
+ * In version 1.5.9, the benchmarking macro has been updated for better timing accuracy using the monotonic clock.
  * This code is AI-generated.
  */
 #ifndef VIBE_BENCH_H

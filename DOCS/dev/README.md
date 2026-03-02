@@ -34,6 +34,7 @@ To maximize I/O throughput, string processing functions (like `vibe_json_print`)
 
 ### Concurrency Optimizations
 - **O(1) Job Insertion**: The worker thread pool in `vibe_thread_pool.h` maintains both head and tail pointers for its job queue. This ensures $O(1)$ job insertion and minimizes lock contention even with large numbers of pending tasks (v1.5.1).
+- **SWAR Hashing**: The `vibe_simple_hash` function in `vibe_crypt.h` is optimized using SWAR (SIMD Within A Register) to process 8 bytes at a time, utilizing word-sized loads and bitmask-based null terminator detection for high-speed hashing (v1.5.9).
 
 ### Arithmetic Optimizations
 - **Modulo Elimination**: The `vibe_xor_cipher` function in `vibe_crypt.h` replaces the modulo operator (`%`) with an incremental index and conditional reset. This avoids expensive division instructions in the hot loop (v1.5.2).
@@ -41,6 +42,7 @@ To maximize I/O throughput, string processing functions (like `vibe_json_print`)
 
 ### Incremental Logic
 - **Centralized Scanning**: A reusable `_get_header_mtime` method performs a single-pass scan of `src/` and `vibe/include/` for headers using efficient stack-based `os.scandir`.
+- **Non-Recursive Traversals**: All directory scanning and file collection logic in `vibe/core/compiler.py` (build, test, audit) uses non-recursive, stack-based traversals with `os.scandir` to improve performance and prevent recursion depth issues (v1.5.9).
 - **Modification Times**: We compare the `mtime` of source files and headers against existing artifacts.
 - **Build Incrementalism**: Checks `.c` and `.h` files against object files in `build/obj/`.
 - **Test Incrementalism**: Checks test source files, project headers, and the compiled project library against test binaries in `build/tests/`.
@@ -76,7 +78,7 @@ The `audit` command uses an optimized regex-based detection system to identify c
 - **JSON Printing**: The `vibe_json.h` header includes a secure string printing helper that escapes double quotes, backslashes, and all control characters (U+0000 to U+001F). It also features recursive depth tracking (max 128) to mitigate stack overflow DoS (v1.4.7-v1.5.8).
 - **Secure Memory**: `vibe_mem.h` provides `vibe_secure_memzero`, which uses a `volatile` pointer and word-sized writes to ensure that memory is actually cleared and not optimized away by the compiler (v1.4.8).
 - **String Security**: `vibe_string.h` implements `vibe_str_eq_constant_time` with a hardened single-pass implementation to mitigate timing attacks on sensitive string comparisons (v1.4.9-v1.5.6).
-- **Network Hardening**: `vibe_net.h` implements zero-initialization of `sockaddr_in` structures and uses `SOMAXCONN` for listening backlogs to mitigate information leakage and DoS (v1.5.0).
+- **Network Hardening**: `vibe_net.h` implements zero-initialization of `sockaddr_in` structures, uses `SOMAXCONN` for listening backlogs, and includes port range validation, `SO_REUSEADDR`, and `FD_CLOEXEC` for improved robustness and resource isolation (v1.5.0-v1.5.9).
 - **Regex Safety**: `vibe_regex.h` includes NULL pointer checks for pattern and text arguments to prevent crashes (v1.5.2).
 - **Library Robustness**: Core library functions in `vibe_json.h`, `vibe_crypt.h`, `vibe_file.h`, `vibe_string.h`, `vibe_net.h`, `vibe_regex.h`, and `vibe_thread_pool.h` include NULL pointer checks on their inputs to prevent runtime crashes (v1.4.7-v1.5.8).
 - **Thread Pool Robustness**: `vibe_thread_pool.h` implements robust error handling for `malloc`, `pthread_mutex_init`, `pthread_cond_init`, and `pthread_create`, ensuring that any initialization failure results in an atomic cleanup of resources. It now also resolves a critical race condition in initialization error paths (v1.5.1-v1.5.8).

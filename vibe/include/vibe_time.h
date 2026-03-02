@@ -1,6 +1,6 @@
 /**
  * This header provides high-resolution timing utilities for the Vibe C library.
- * In version 1.5.8, it implements vibe_get_time using the monotonic clock for accurate, drift-free duration measurement.
+ * In version 1.5.9, it implements vibe_get_time using the monotonic clock for accurate, drift-free duration measurement.
  * This code is AI-generated.
  */
 #ifndef VIBE_TIME_H

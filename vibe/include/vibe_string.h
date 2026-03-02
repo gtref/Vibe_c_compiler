@@ -1,6 +1,6 @@
 /**
  * This header provides secure string comparison utilities for the Vibe C library.
- * In version 1.5.8, it features a hardened constant-time comparison to prevent timing attacks and handle NULL inputs.
+ * In version 1.5.9, it features a hardened constant-time comparison to prevent timing attacks and handle NULL inputs.
  * This code is AI-generated.
  */
 #ifndef VIBE_STRING_H

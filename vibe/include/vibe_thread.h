@@ -1,6 +1,6 @@
 /**
  * This header provides a simple wrapper around the POSIX threads (pthreads) library for the Vibe C library.
- * In version 1.5.8, it continues to provide basic macros for thread creation and joining with consistent naming.
+ * In version 1.5.9, it continues to provide basic macros for thread creation and joining with consistent naming.
  * This code is AI-generated.
  */
 #ifndef VIBE_THREAD_H

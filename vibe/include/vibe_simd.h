@@ -1,6 +1,6 @@
 /**
  * This header provides a portable wrapper for SIMD (Single Instruction, Multiple Data) intrinsics in the Vibe C library.
- * In version 1.5.8, it continues to automatically include the appropriate intrinsic headers based on detected architecture.
+ * In version 1.5.9, it continues to automatically include the appropriate intrinsic headers based on detected architecture.
  * This code is AI-generated.
  */
 #ifndef VIBE_SIMD_H

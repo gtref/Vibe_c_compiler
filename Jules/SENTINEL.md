@@ -1,5 +1,28 @@
 # Sentinel Security Log 🛡️
 
+## 2026-08-15 - [1.5.9] - Networking Robustness and Resource Isolation
+
+### 🔍 Found
+- **Lack of Port Validation**: `vibe_net_listen` and `vibe_net_connect` did not validate the port range (0-65535), potentially allowing invalid socket operations.
+- **Port Reuse Issues**: The server could not be immediately restarted on the same port after a crash or shutdown due to the socket remaining in `TIME_WAIT` state.
+- **Resource Inheritance Risk**: File descriptors for sockets were not marked with `FD_CLOEXEC`, allowing them to be inherited by child processes, which could lead to resource leaks or security bypasses in multi-process environments.
+
+### 🎯 Impact
+- **Application Instability**: Invalid ports could cause unexpected behavior in networking calls.
+- **Operational Downtime**: Inability to restart services immediately impacts availability.
+- **Information Leakage/Resource Exhaustion**: Leaked file descriptors in child processes can expose sensitive connections or exhaust the system's descriptor limit.
+
+### 🔧 Fix
+- **Port Range Enforcement**: Added explicit checks for `port < 0 || port > 65535` in `vibe/include/vibe_net.h`.
+- **Immediate Restart Support**: Implemented `SO_REUSEADDR` using `setsockopt` in `vibe_net_listen`.
+- **Descriptor Isolation**: Implemented `FD_CLOEXEC` using `fcntl` for all sockets created in the networking library.
+- **Version Bump**: Incremented project version to 1.5.9 across the codebase.
+
+### ✅ Verification
+- Created `tests/test_net_security.c` and verified that `SO_REUSEADDR` and `FD_CLOEXEC` are correctly applied.
+- Confirmed that invalid ports are rejected by the networking utilities.
+- Verified that all existing functional and security tests continue to pass.
+
 ## 2026-08-01 - [1.5.8] - Thread Pool Race Condition and Audit Hardening
 
 ### 🔍 Found

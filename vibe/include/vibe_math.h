@@ -1,6 +1,6 @@
 /**
  * This header provides common math constants and helper macros for the Vibe C library.
- * In version 1.5.8, it continues to provide high-precision PI and E constants, as well as min/max macros.
+ * In version 1.5.9, it continues to provide high-precision PI and E constants, as well as min/max macros.
  * This code is AI-generated.
  */
 #ifndef VIBE_MATH_H

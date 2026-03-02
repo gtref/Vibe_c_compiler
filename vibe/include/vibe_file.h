@@ -1,6 +1,6 @@
 /**
  * This header provides simple file I/O utilities for the Vibe C library.
- * In version 1.5.8, it includes a robust file reading function with automatic null-termination and enhanced error checks.
+ * In version 1.5.9, it includes a robust file reading function with automatic null-termination and enhanced error checks.
  * This code is AI-generated.
  */
 #ifndef VIBE_FILE_H

@@ -1,6 +1,6 @@
 /**
  * This header provides simple terminal User Interface (UI) helpers for the Vibe C library.
- * In version 1.5.8, it uses Vibe color constants to format and print colorized section headers to stdout.
+ * In version 1.5.9, it uses Vibe color constants to format and print colorized section headers to stdout.
  * This code is AI-generated.
  */
 #ifndef VIBE_UI_H

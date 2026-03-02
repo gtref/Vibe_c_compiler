@@ -1,6 +1,6 @@
 /**
  * This header implements high-performance and secure JSON serialization for the Vibe C library.
- * In version 1.5.8, it features recursive depth tracking, secure character escaping, and hardened printing macros.
+ * In version 1.5.9, it features recursive depth tracking, secure character escaping, and hardened printing macros.
  * This code is AI-generated.
  */
 #ifndef VIBE_JSON_H

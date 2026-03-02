@@ -1,6 +1,6 @@
 /**
  * This header provides a simple unit testing framework for the Vibe C library.
- * In version 1.5.8, it provides robust macros for assertions and colorized summary reporting for CLI integration.
+ * In version 1.5.9, it provides robust macros for assertions and colorized summary reporting for CLI integration.
  * This code is AI-generated.
  */
 #ifndef VIBE_TEST_H

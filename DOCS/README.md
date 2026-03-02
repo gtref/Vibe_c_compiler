@@ -25,7 +25,7 @@
 Vibe C comes with 25 custom headers located in `vibe/include/`. You can include them in your source code using `#include <vibe_xxx.h>`.
 
 ### Core Headers
-- `vibe_std.h`: Core types and version info. Includes `stdint.h`, `stdbool.h`, and `stdio.h`. (v1.5.8: Updated version)
+- `vibe_std.h`: Core types and version info. Includes `stdint.h`, `stdbool.h`, and `stdio.h`. (v1.5.9: Updated version)
 - `vibe_io.h`: Simple printing macros like `vibe_print()` (now with compile-time format string hardening).
 - `vibe_math.h`: Math constants and min/max macros.
 - `vibe_string.h`: String comparison helpers like `vibe_str_eq()` and `vibe_str_eq_constant_time()` (v1.5.6: Hardened constant-time comparison).
@@ -50,8 +50,8 @@ Vibe C comes with 25 custom headers located in `vibe/include/`. You can include 
 - `vibe_file.h`: Easy file reading utility (now with NULL checks).
 - `vibe_json.h`: JSON parsing and secure printing with depth tracking (v1.5.8: Hardened printing macros).
 - `vibe_thread.h`: Simple pthread wrapper.
-- `vibe_net.h`: TCP listening and connecting (now with `SOMAXCONN` hardening, zero-initialization, and NULL checks).
-- `vibe_crypt.h`: Simple XOR and hashing (now with NULL checks and optimized XOR SWAR paths).
+- `vibe_net.h`: TCP listening and connecting (now with `SOMAXCONN` hardening, port validation, `SO_REUSEADDR`, and `FD_CLOEXEC`).
+- `vibe_crypt.h`: Simple XOR and high-performance SWAR-based DJB2 hashing (v1.5.9: 8-byte SWAR optimization).
 - `vibe_regex.h`: POSIX regex wrapper (now with NULL checks).
 - `vibe_thread_pool.h`: Worker thread pool implementation (now with robust error handling, atomic initialization, and resource hardening).
 
@@ -115,7 +115,9 @@ Vibe C features a high-performance build system optimized for developer producti
 - **Parallelized Security Audit**: The security audit system is parallelized across multiple cores for rapid project-wide scanning, including internal header checks (v1.4.8).
 - **High-Performance JSON Printing**: Optimized with chunked I/O to significantly reduce system call overhead when printing strings (v1.4.7).
 - **Optimized XOR Cipher**: Uses incremental indexing and SWAR specialization to maximize throughput in the XOR hot loop (v1.5.2-v1.5.7).
+- **High-Performance SWAR Hashing**: Optimized the DJB2 hashing algorithm in `vibe_crypt.h` to process 8 bytes at a time using word-sized loads and bitmask-based null detection (v1.5.9).
 - **Incremental Builds & Tests**: Automatically detects changed source, headers, and libraries to only recompile and rerun what is necessary.
+- **Non-Recursive Traversals**: Optimized directory scanning logic in the compiler to use non-recursive, stack-based traversals for maximum efficiency and safety (v1.5.9).
 - **Binary Hardening**: Automatically applies comprehensive security hardening flags (e.g., Stack Protector, PIE, RELRO) to all compilation and linking steps (v1.4.5).
 - **Thread Pool Robustness**: `vibe_thread_pool.h` includes comprehensive error handling for `malloc` and `pthread` failures, with atomic cleanup logic to prevent resource leaks (v1.5.1).
 - **Optimized Scanning**: Efficient `os.scandir` scanning, cached header `mtime`, and $O(1)$ multi-pattern matching ensure that builds, tests, and security audits are high-performance (v1.4.4+).
