@@ -82,3 +82,8 @@
 **Vulnerability:** Lack of port validation, SO_REUSEADDR support, and FD_CLOEXEC in networking utilities.
 **Learning:** Network security is not just about data encryption; it also involves ensuring resource availability (restarting services quickly) and isolation (preventing file descriptor inheritance by child processes).
 **Prevention:** Always validate numeric inputs for network bounds (e.g., ports). Use SO_REUSEADDR for servers and set FD_CLOEXEC on all new file descriptors to follow the principle of least privilege.
+
+## 2026-08-20 - Resource Limiting in File I/O Utilities
+**Vulnerability:** Unbounded memory allocation in `vibe_read_file` leading to OOM Denial-of-Service.
+**Learning:** Utilities that read entire files into memory must always enforce a hard size limit to prevent resource exhaustion, especially when file sources might be untrusted or malformed.
+**Prevention:** Implement strict upper bounds on all file and network I/O operations and verify all system call return values (`fseek`, `ftell`) to ensure state consistency.

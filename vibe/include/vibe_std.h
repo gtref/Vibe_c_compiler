@@ -12,6 +12,6 @@
 #include <stdbool.h>
 
 // Internal Logic: Define the library version. This should be kept in sync with the VERSION file.
-#define VIBE_VERSION "1.5.9"
+#define VIBE_VERSION "1.5.10"
 
 #endif

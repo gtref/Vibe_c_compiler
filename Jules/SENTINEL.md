@@ -23,6 +23,28 @@
 - Confirmed that all existing functional and security tests pass.
 - Verified that `vcc audit` shows no regressions in the core library.
 
+## 2026-08-20 - [1.5.10] - File I/O Hardening and OOM Mitigation
+
+### 🔍 Found
+- **Unbounded File Reading**: `vibe_read_file` lacked a maximum file size limit, allowing an attacker to trigger an Out-Of-Memory (OOM) condition by tricking the application into reading a maliciously large file.
+- **Potential Integer Overflow**: The allocation size `len + 1` was not checked for potential integer overflow before being passed to `malloc`.
+- **Incomplete Error Handling**: Certain file positioning operations (`fseek`) lacked return value verification, which could lead to undefined behavior with malformed files.
+
+### 🎯 Impact
+- **Denial of Service (DoS)**: Memory exhaustion could crash the application or the entire system.
+- **Application Instability**: Unchecked overflows or failed syscalls could lead to segmentation faults or heap corruption.
+
+### 🔧 Fix
+- **Resource Limiting**: Introduced `VIBE_FILE_MAX_SIZE` (default 10MB) to enforce a hard limit on file reads.
+- **Overflow Protection**: Added explicit checks for `SIZE_MAX` before incrementing the allocation size.
+- **Robust Syscalls**: Implemented return value checks for all `fseek` calls and ensured atomic cleanup (closing handles, freeing buffers) on all failure paths.
+- **Version Bump**: Incremented project version to 1.5.10 across the codebase.
+
+### ✅ Verification
+- Created `tests/test_file_security.c` and verified that oversized files are rejected, NULL inputs are handled safely, and valid files are processed correctly.
+- Confirmed all existing functional and security tests pass.
+- Verified that `vcc audit` reports no issues in the updated header.
+
 ## 2026-08-01 - [1.5.8] - Thread Pool Race Condition and Audit Hardening
 
 ### 🔍 Found

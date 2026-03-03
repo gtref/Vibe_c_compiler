@@ -7,6 +7,12 @@
 #define VIBE_FILE_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+
+// Sentinel: Default maximum file size (10MB) to prevent OOM Denial-of-Service attacks.
+#ifndef VIBE_FILE_MAX_SIZE
+#define VIBE_FILE_MAX_SIZE (10 * 1024 * 1024)
+#endif
 
 /**
  * vibe_read_file - Reads the entire contents of a file into a heap-allocated buffer.
@@ -20,16 +26,28 @@ static inline char* vibe_read_file(const char* filename) {
     if (!f) return NULL;
 
     // Internal Logic: Navigate to the end of the file to determine the total length in bytes.
-    fseek(f, 0, SEEK_END);
-    long len = ftell(f);
-    if (len < 0) {
+    if (fseek(f, 0, SEEK_END) != 0) {
         fclose(f);
         return NULL;
     }
-    fseek(f, 0, SEEK_SET);
+    long len = ftell(f);
+    if (len < 0 || len >= VIBE_FILE_MAX_SIZE) {
+        fclose(f);
+        return NULL;
+    }
+    if (fseek(f, 0, SEEK_SET) != 0) {
+        fclose(f);
+        return NULL;
+    }
 
     // Internal Logic: Allocate a buffer to hold the file content plus one byte for the null terminator.
-    char* data = (char*)malloc(len + 1);
+    // Sentinel: Explicitly check for integer overflow before allocation.
+    if (len == SIZE_MAX) {
+        fclose(f);
+        return NULL;
+    }
+
+    char* data = (char*)malloc((size_t)len + 1);
     if (!data) {
         fclose(f);
         return NULL;
