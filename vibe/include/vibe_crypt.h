@@ -99,6 +99,32 @@ static inline void vibe_xor_cipher(uint8_t* data, size_t len, const uint8_t* key
         return;
     }
 
+    // BOLT: Specialization for 32-byte keys to allow 256-bit processing using four 64-bit words.
+    if (key_len == 32) {
+        uint64_t k[4];
+        memcpy(&k[0], key, 8);
+        memcpy(&k[1], key + 8, 8);
+        memcpy(&k[2], key + 16, 8);
+        memcpy(&k[3], key + 24, 8);
+        size_t i = 0;
+        for (; i + 32 <= len; i += 32) {
+            uint64_t d[4];
+            memcpy(&d[0], &data[i], 8);
+            memcpy(&d[1], &data[i + 8], 8);
+            memcpy(&d[2], &data[i + 16], 8);
+            memcpy(&d[3], &data[i + 24], 8);
+            d[0] ^= k[0]; d[1] ^= k[1]; d[2] ^= k[2]; d[3] ^= k[3];
+            memcpy(&data[i], &d[0], 8);
+            memcpy(&data[i + 8], &d[1], 8);
+            memcpy(&data[i + 16], &d[2], 8);
+            memcpy(&data[i + 24], &d[3], 8);
+        }
+        for (; i < len; i++) {
+            data[i] ^= key[i & 31];
+        }
+        return;
+    }
+
     // BOLT: Specialization for 8-byte keys to allow 64-bit word-sized XOR operations.
     if (key_len == 8) {
         uint64_t k8;
