@@ -1,6 +1,6 @@
 /**
  * This benchmark compares the performance of the optimized vibe_secure_memzero against a simple byte-wise loop.
- * In version 1.5.6, it continues to demonstrate the efficiency of word-sized writes for large buffers.
+ * In version 1.5.11, it continues to demonstrate the efficiency of word-sized writes for large buffers.
  * This code is AI-generated.
  */
 #include "../vibe/include/vibe_mem.h"
@@ -12,6 +12,7 @@
 
 /**
  * baseline_secure_memzero - Simple byte-wise secure memzero for comparison.
+ * Internal Logic: Standard byte-by-byte volatile write loop to prevent optimization.
  */
 void baseline_secure_memzero(void* p, size_t len) {
     if (!p) return;
@@ -30,7 +31,7 @@ int main() {
     // Test with unaligned pointer
     void* p = (void*)((uintptr_t)data + 1);
 
-    printf("--- Secure Memzero Performance Benchmark ---\n");
+    printf("--- Secure Memzero Performance Benchmark ---\n"); // nosec
 
     VIBE_BENCHMARK("Baseline Secure Memzero", {
         baseline_secure_memzero(p, len);

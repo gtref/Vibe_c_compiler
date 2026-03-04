@@ -1,6 +1,6 @@
 /**
  * This header serves as a central entry point for architecture-specific definitions in the Vibe C library.
- * In version 1.5.10, it provides a unified interface for x86_64, ARM64, and RISC-V targets by aggregating headers.
+ * In version 1.5.11, it provides a unified interface for x86_64, ARM64, and RISC-V targets by aggregating headers.
  * This code is AI-generated.
  */
 #ifndef VIBE_ARCH_H

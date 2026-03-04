@@ -1,6 +1,6 @@
 /**
  * This header provides standardized logging macros for the Vibe C library with hardened security.
- * In version 1.5.10, these continue to enforce string literal formats to mitigate injection risks through literal concatenation.
+ * In version 1.5.11, these continue to enforce string literal formats to mitigate injection risks through literal concatenation.
  * This code is AI-generated.
  */
 #ifndef VIBE_LOG_H

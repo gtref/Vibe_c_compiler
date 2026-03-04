@@ -1,51 +1,54 @@
 /**
  * This test verifies the security hardening of the thread pool implementation.
- * It checks the maximum thread limit and the rejection of jobs during shutdown.
+ * In version 1.5.11, it checks the maximum thread limit, job rejection during shutdown, and queue size enforcement.
  * This code is AI-generated.
  */
 #include "../vibe/include/vibe_thread_pool.h"
 #include "../vibe/include/vibe_test.h"
 #include <unistd.h>
 
+/**
+ * empty_job - A no-op job for testing queue behavior.
+ */
 void empty_job(void* arg) {
     (void)arg;
 }
 
 int main() {
-    printf("Starting thread pool security tests...\n");
+    printf("Starting thread pool security tests...\n"); // nosec
 
-    // Test 1: Thread limit
+    // Internal Logic: Verify that attempting to create a pool exceeding the 1024 thread limit is rejected.
     vibe_thread_pool_t* oversized_pool = vibe_thread_pool_create(1025);
     VIBE_ASSERT(oversized_pool == NULL);
     if (oversized_pool) vibe_thread_pool_destroy(oversized_pool);
 
-    // Test 2: Reasonable limit
+    // Internal Logic: Ensure a standard sized pool is successfully initialized.
     vibe_thread_pool_t* pool = vibe_thread_pool_create(4);
     VIBE_ASSERT(pool != NULL);
 
-    // Test 3: Shutdown rejection
+    // Internal Logic: Manually trigger the shutdown flag to verify that new jobs are correctly rejected.
     pthread_mutex_lock(&(pool->lock));
-    pool->shutdown = true; // Manually trigger shutdown for testing rejection
+    pool->shutdown = true;
     pthread_mutex_unlock(&(pool->lock));
 
     vibe_thread_pool_add_job(pool, empty_job, NULL);
     VIBE_ASSERT(pool->queue_size == 0); // Job should have been rejected and freed
 
-    // Test 4: Queue limit
+    // Internal Logic: Reset shutdown and set a small queue limit to verify OOM protection behavior.
     pthread_mutex_lock(&(pool->lock));
-    pool->shutdown = false; // Re-enable for this test
-    pool->max_queue_size = 2; // Set a small limit
+    pool->shutdown = false;
+    pool->max_queue_size = 2;
     pthread_mutex_unlock(&(pool->lock));
 
     vibe_thread_pool_add_job(pool, empty_job, NULL);
     vibe_thread_pool_add_job(pool, empty_job, NULL);
     VIBE_ASSERT(pool->queue_size == 2);
 
-    vibe_thread_pool_add_job(pool, empty_job, NULL); // Should be rejected
+    // Internal Logic: Verify that additional jobs are rejected once the max queue size is reached.
+    vibe_thread_pool_add_job(pool, empty_job, NULL);
     VIBE_ASSERT(pool->queue_size == 2);
 
-    // Cleanup (note: destroy expects threads to be joinable, but here they are still running)
-    // To safely destroy after our manual shutdown trigger, we need to signal workers
+    // Internal Logic: Signal workers and safely destroy the pool to clean up resources.
     pthread_mutex_lock(&(pool->lock));
     pthread_cond_broadcast(&(pool->notify));
     pthread_mutex_unlock(&(pool->lock));

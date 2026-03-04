@@ -1,6 +1,6 @@
 /**
  * This header provides simple file I/O utilities for the Vibe C library with enhanced security.
- * In version 1.5.10, it features hardened file reading with size limits and OOM mitigation.
+ * In version 1.5.11, it features hardened file reading with size limits and OOM mitigation.
  * This code is AI-generated.
  */
 #ifndef VIBE_FILE_H

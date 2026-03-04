@@ -1,6 +1,6 @@
 /**
  * This test suite verifies the security features of the Vibe C library, including NULL pointer safety and constant-time comparison.
- * In version 1.5.6, the constant-time comparison has been hardened and is verified here.
+ * In version 1.5.11, the constant-time comparison and XOR correctness are verified to ensure no regressions.
  * This code is AI-generated.
  */
 #include <vibe_std.h>
@@ -12,9 +12,9 @@
 
 /**
  * test_null_checks - Verifies that core functions correctly handle NULL inputs.
+ * Internal Logic: Assert that various functions return expected values when passed NULL pointers.
  */
 void test_null_checks() {
-    // Internal Logic: Assert that various functions return expected values when passed NULL pointers.
     VIBE_ASSERT(vibe_str_eq(NULL, "test") == false);
     VIBE_ASSERT(vibe_str_eq("test", NULL) == false);
     VIBE_ASSERT(vibe_str_eq(NULL, NULL) == true);
@@ -31,9 +31,9 @@ void test_null_checks() {
 
 /**
  * test_constant_time_eq - Verifies the correctness of the constant-time string comparison.
+ * Internal Logic: Check identical strings, different strings, and length-mismatched strings for correct results.
  */
 void test_constant_time_eq() {
-    // Internal Logic: Check identical strings, different strings, and length-mismatched strings.
     VIBE_ASSERT(vibe_str_eq_constant_time("test", "test") == true);
     VIBE_ASSERT(vibe_str_eq_constant_time("test", "fail") == false);
     VIBE_ASSERT(vibe_str_eq_constant_time("test", "test1") == false);
@@ -44,6 +44,7 @@ void test_constant_time_eq() {
 
 /**
  * test_xor_cipher - Verifies the correctness of the XOR cipher implementation.
+ * Internal Logic: Performs XOR encryption and decryption, verifying against expected results and ensuring identity transformation.
  */
 void test_xor_cipher() {
     uint8_t data[] = "hello world";

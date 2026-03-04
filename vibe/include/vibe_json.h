@@ -1,6 +1,6 @@
 /**
  * This header implements high-performance and secure JSON serialization for the Vibe C library.
- * In version 1.5.10, it features recursive depth tracking, secure character escaping, and hardened printing macros.
+ * In version 1.5.11, it features recursive depth tracking, secure character escaping, and hardened printing macros.
  * This code is AI-generated.
  */
 #ifndef VIBE_JSON_H
@@ -47,9 +47,9 @@ typedef struct vibe_json_value {
 
 /**
  * vibe_json_new_string - Creates a new JSON string value
+ * Internal Logic: Sanitize input and allocate memory for the JSON value structure and its string content.
  */
 static inline vibe_json_value_t* vibe_json_new_string(const char* s) {
-    // Internal Logic: Sanitize input and allocate memory for the JSON value structure and its string content.
     if (!s) return NULL;
     vibe_json_value_t* v = (vibe_json_value_t*)malloc(sizeof(vibe_json_value_t));
     if (!v) return NULL;
@@ -64,9 +64,9 @@ static inline vibe_json_value_t* vibe_json_new_string(const char* s) {
 
 /**
  * vibe_json_free - Recursively frees a JSON value structure
+ * Internal Logic: Recursively traverse the JSON tree to free all allocated memory for strings, arrays, and objects.
  */
 static inline void vibe_json_free(vibe_json_value_t* v) {
-    // Internal Logic: Recursively traverse the JSON tree to free all allocated memory for strings, arrays, and objects.
     if (!v) return;
     if (v->type == VIBE_JSON_STRING) {
         free(v->value.string);
@@ -88,9 +88,9 @@ static inline void vibe_json_free(vibe_json_value_t* v) {
 
 /**
  * _vibe_json_print_escaped - Internal helper for secure string escaping
+ * Internal Logic: Implement JSON-compliant escaping for quotes, backslashes, and control characters (U+0000 to U+001F).
  */
 static inline void _vibe_json_print_escaped(const char* s) {
-    // Internal Logic: Implement JSON-compliant escaping for quotes, backslashes, and control characters (U+0000 to U+001F).
     if (!s) { fputs("null", stdout); return; }
     putchar('\"');
     const char* start = s;
@@ -124,6 +124,7 @@ static inline void _vibe_json_print_escaped(const char* s) {
 
 /**
  * _vibe_json_print_recursive - Internal helper for depth-tracked printing
+ * Internal Logic: Depth tracking to prevent stack overflow DoS by enforcing VIBE_JSON_MAX_DEPTH.
  */
 static inline void _vibe_json_print_recursive(vibe_json_value_t* v, int depth) {
     // Sentinel: Depth tracking to prevent stack overflow DoS by enforcing VIBE_JSON_MAX_DEPTH.
@@ -185,9 +186,9 @@ static inline void _vibe_json_print_recursive(vibe_json_value_t* v, int depth) {
 
 /**
  * vibe_json_print - Prints a JSON value to stdout with security depth tracking
+ * Internal Logic: Entry point for JSON printing, initializing depth tracking at zero.
  */
 static inline void vibe_json_print(vibe_json_value_t* v) {
-    // Internal Logic: Entry point for JSON printing, initializing depth tracking at zero.
     _vibe_json_print_recursive(v, 0);
 }
 

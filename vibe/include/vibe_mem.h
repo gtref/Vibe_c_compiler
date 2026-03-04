@@ -1,6 +1,6 @@
 /**
  * This header provides memory management utilities for the Vibe C library, including secure wiping.
- * In version 1.5.10, it continues to feature an optimized vibe_secure_memzero for safe clearing of sensitive data.
+ * In version 1.5.11, it continues to feature an optimized vibe_secure_memzero for safe clearing of sensitive data.
  * This code is AI-generated.
  */
 #ifndef VIBE_MEM_H

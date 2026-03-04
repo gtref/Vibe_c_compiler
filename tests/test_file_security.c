@@ -1,7 +1,7 @@
 /**
  * This test verifies the security hardening of the vibe_read_file function.
- * It checks that the function correctly handles NULL inputs, oversized files, and robust error paths.
- * In version 1.5.10, vibe_read_file enforces a VIBE_FILE_MAX_SIZE (10MB) to prevent OOM/DoS.
+ * In version 1.5.11, it checks that the function correctly handles NULL inputs, oversized files, and robust error paths.
+ * vibe_read_file enforces a VIBE_FILE_MAX_SIZE (10MB) to prevent OOM/DoS.
  * This code is AI-generated.
  */
 #include "vibe_file.h"
@@ -11,6 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * test_file_security - Exercises various error and edge cases for the file reading utility.
+ * Internal Logic: Attempts to read NULL, non-existent, and oversized files to ensure graceful failure.
+ */
 void test_file_security() {
     vibe_ui_header("File I/O Security Tests");
 
@@ -25,15 +29,17 @@ void test_file_security() {
     // Test 3: Normal small file
     const char* filename = "test_normal.txt";
     FILE* f = fopen(filename, "w");
-    fprintf(f, "Hello Vibe!"); /* nosec */
-    fclose(f);
+    if (f) {
+        fprintf(f, "Hello Vibe!"); /* nosec */
+        fclose(f);
 
-    char* data = vibe_read_file(filename);
-    VIBE_ASSERT(data != NULL);
-    VIBE_ASSERT(strcmp(data, "Hello Vibe!") == 0);
-    free(data);
-    remove(filename);
-    printf("  [+] Passed: Normal small file read correctly.\n"); /* nosec */
+        char* data = vibe_read_file(filename);
+        VIBE_ASSERT(data != NULL);
+        VIBE_ASSERT(strcmp(data, "Hello Vibe!") == 0);
+        free(data);
+        remove(filename);
+        printf("  [+] Passed: Normal small file read correctly.\n"); /* nosec */
+    }
 
     // Test 4: Oversized file (simulated by creating a file larger than 10MB)
     // We'll create a 11MB file to trigger the VIBE_FILE_MAX_SIZE limit.
@@ -47,7 +53,7 @@ void test_file_security() {
         }
         fclose(f);
 
-        data = vibe_read_file(large_filename);
+        char* data = vibe_read_file(large_filename);
         VIBE_ASSERT(data == NULL); // Should be rejected due to size limit
         remove(large_filename);
         printf("  [+] Passed: Oversized file (11MB) rejected as expected.\n"); /* nosec */

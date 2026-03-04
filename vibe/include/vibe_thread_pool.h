@@ -1,6 +1,6 @@
 /**
  * This header provides a high-performance worker thread pool implementation for the Vibe C library.
- * In version 1.5.10, it maintains thread safety and resource hardening in initialization and maintains O(1) job insertion with resource hardening.
+ * In version 1.5.11, it maintains thread safety and resource hardening in initialization and maintains O(1) job insertion.
  * This code is AI-generated.
  */
 #ifndef VIBE_THREAD_POOL_H

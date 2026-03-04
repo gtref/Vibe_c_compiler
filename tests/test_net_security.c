@@ -1,6 +1,6 @@
 /**
  * This test verifies the security hardening of the networking utilities.
- * It checks for port validation, SO_REUSEADDR, and FD_CLOEXEC flags.
+ * In version 1.5.11, it checks for port validation, SO_REUSEADDR, and FD_CLOEXEC flags.
  * This code is AI-generated.
  */
 #include <vibe_net.h>
@@ -10,15 +10,22 @@
 #include <sys/socket.h>
 #include <errno.h>
 
+/**
+ * test_port_validation - Verifies that invalid ports are correctly rejected.
+ * Internal Logic: Attempts to listen and connect with out-of-range port numbers.
+ */
 void test_port_validation() {
     vibe_print("Testing port validation...\n");
-    // Invalid ports should return -1
     VIBE_ASSERT(vibe_net_listen(-1) == -1);
     VIBE_ASSERT(vibe_net_listen(65536) == -1);
     VIBE_ASSERT(vibe_net_connect("127.0.0.1", -1) == -1);
     VIBE_ASSERT(vibe_net_connect("127.0.0.1", 65536) == -1);
 }
 
+/**
+ * test_socket_options - Verifies that security-critical socket options are applied.
+ * Internal Logic: Checks for SO_REUSEADDR and FD_CLOEXEC on a successfully created socket.
+ */
 void test_socket_options() {
     vibe_print("Testing socket options...\n");
     int port = 9999;
@@ -46,4 +53,5 @@ int main() {
     test_port_validation();
     test_socket_options();
     VIBE_TEST_SUMMARY();
+    return 0;
 }

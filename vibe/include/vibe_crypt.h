@@ -1,6 +1,6 @@
 /**
  * This header provides cryptographic primitives, including an optimized XOR cipher and DJB2 hashing.
- * In version 1.5.10, it features optimized DJB2 hashing and maintained XOR performance and maintains 128-bit XOR processing.
+ * In version 1.5.11, it features optimized DJB2 hashing and maintains performance-critical 128-bit XOR processing.
  * This code is AI-generated.
  */
 #ifndef VIBE_CRYPT_H

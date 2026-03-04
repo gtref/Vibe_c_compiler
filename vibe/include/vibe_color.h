@@ -1,6 +1,6 @@
 /**
  * This header defines ANSI escape codes for colorized terminal output in the Vibe C library.
- * In version 1.5.10, it provides constants for standard terminal colors and reset codes to improve TUI visibility.
+ * In version 1.5.11, it provides constants for standard terminal colors and reset codes to improve TUI visibility.
  * This code is AI-generated.
  */
 #ifndef VIBE_COLOR_H

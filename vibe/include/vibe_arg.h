@@ -1,6 +1,6 @@
 /**
  * This header provides simple command-line argument parsing utilities for the Vibe C library.
- * In version 1.5.10, it includes robust checks for flag presence and associated value retrieval from argv.
+ * In version 1.5.11, it includes robust checks for flag presence and associated value retrieval from argv.
  * This code is AI-generated.
  */
 #ifndef VIBE_ARG_H
