@@ -1,6 +1,6 @@
 /**
  * This header provides a simple wrapper for the POSIX regular expression library.
- * In version 1.5.10, it continues to provide easy pattern matching with enhanced NULL pointer safety and resource management.
+ * In version 1.5.11, it continues to provide easy pattern matching with enhanced NULL pointer safety and resource management.
  * This code is AI-generated.
  */
 #ifndef VIBE_REGEX_H

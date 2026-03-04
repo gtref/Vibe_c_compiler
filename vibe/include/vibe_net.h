@@ -1,6 +1,6 @@
 /**
  * This header provides networking utilities for TCP listening and connecting in the Vibe C library.
- * In version 1.5.10, it maintains robust networking with port validation, SO_REUSEADDR for immediate restarts, and FD_CLOEXEC flags for security.
+ * In version 1.5.11, it maintains robust networking with port validation, SO_REUSEADDR for immediate restarts, and FD_CLOEXEC flags for security.
  * This code is AI-generated.
  */
 #ifndef VIBE_NET_H

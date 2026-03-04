@@ -25,10 +25,10 @@
 Vibe C comes with 25 custom headers located in `vibe/include/`. You can include them in your source code using `#include <vibe_xxx.h>`.
 
 ### Core Headers
-- `vibe_std.h`: Core types and version info. Includes `stdint.h`, `stdbool.h`, and `stdio.h`. (v1.5.10: Updated version)
-- `vibe_io.h`: Simple printing macros like `vibe_print()` (now with compile-time format string hardening).
+- `vibe_std.h`: Core types and version info. Includes `stdint.h`, `stdbool.h`, and `stdio.h`. (v1.5.11: Updated version)
+- `vibe_io.h`: Simple printing macros like `vibe_print()` and hardened `vibe_snprintf`/`vibe_vsnprintf`. (v1.5.11: Hardened I/O)
 - `vibe_math.h`: Math constants and min/max macros.
-- `vibe_string.h`: String comparison helpers like `vibe_str_eq()` and `vibe_str_eq_constant_time()` (v1.5.6: Hardened constant-time comparison).
+- `vibe_string.h`: String comparison helpers like `vibe_str_eq()` and secure `vibe_str_copy`. (v1.5.11: Added vibe_str_copy)
 - `vibe_sys.h`: OS detection macros (`VIBE_OS_LINUX`, `VIBE_OS_WINDOWS`, `VIBE_OS_MACOS`).
 - `vibe_arg.h`: Simple command-line argument parsing utilities (`vibe_arg_has`, `vibe_arg_get`).
 

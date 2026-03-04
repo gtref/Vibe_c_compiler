@@ -43,9 +43,10 @@ A clean command-line interface built with `argparse`, and an optional interactiv
 - **Network Hardening**: Implemented zero-initialization of network structures and `SOMAXCONN` listen backlogs to prevent information leakage and DoS attacks (v1.5.0).
 - **Regex Safety**: `vibe_regex.h` includes NULL pointer checks to prevent crashes when matching unvalidated inputs (v1.5.2).
 - **File I/O Hardening**: `vibe_file.h` prevents OOM/DoS by enforcing a 10MB file size limit and verifying all file positioning system calls (v1.5.10).
-- **Thread Pool Robustness**: `vibe_thread_pool.h` implements robust error handling for `malloc`, `pthread_mutex_init`, `pthread_cond_init`, and `pthread_create`, with atomic cleanup logic to prevent resource leaks and crashes. It features a hard 1024 thread limit (v1.5.1-v1.5.10).
+- **String and I/O Hardening**: Implemented `vibe_str_copy` for guaranteed null-termination and `vibe_snprintf`/`vibe_vsnprintf` for format string literal enforcement (v1.5.11).
+- **Thread Pool Robustness**: `vibe_thread_pool.h` implements robust error handling for `malloc`, `pthread_mutex_init`, `pthread_cond_init`, and `pthread_create`, with atomic cleanup logic to prevent resource leaks and crashes. It features a hard 1024 thread limit (v1.5.1-v1.5.11).
 - **Compile-time Format String Hardening**: Hardens variadic macros in `vibe_io.h` and `vibe_log.h` by using string literal concatenation to prefix the format string with a literal, eliminating format string injection at the source (v1.5.1).
-- **Library Robustness**: Core headers include NULL pointer checks and secure, fully-compliant JSON escaping with recursive depth tracking (v1.4.7-v1.5.10).
+- **Library Robustness**: Core headers include NULL pointer checks and secure, fully-compliant JSON escaping with recursive depth tracking (v1.4.7-v1.5.11).
 
 ## Performance Engineering (Bolt ⚡)
 
