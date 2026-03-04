@@ -1,6 +1,6 @@
 /**
  * This header implements high-performance and secure JSON serialization for the Vibe C library.
- * In version 1.5.10, it features recursive depth tracking, secure character escaping, and hardened printing macros.
+ * In version 1.5.11, it features recursive depth tracking, secure character escaping, and hardened printing macros.
  * This code is AI-generated.
  */
 #ifndef VIBE_JSON_H
@@ -46,10 +46,13 @@ typedef struct vibe_json_value {
 } vibe_json_value_t;
 
 /**
- * vibe_json_new_string - Creates a new JSON string value
+ * Create a new JSON string value from a C string.
+ *
+ * @param s Null-terminated C string to copy into the JSON value.
+ * @returns Pointer to a newly allocated `vibe_json_value_t` with type `VIBE_JSON_STRING`,
+ *          or `NULL` if `s` is `NULL` or memory allocation fails.
  */
 static inline vibe_json_value_t* vibe_json_new_string(const char* s) {
-    // Internal Logic: Sanitize input and allocate memory for the JSON value structure and its string content.
     if (!s) return NULL;
     vibe_json_value_t* v = (vibe_json_value_t*)malloc(sizeof(vibe_json_value_t));
     if (!v) return NULL;
@@ -63,10 +66,14 @@ static inline vibe_json_value_t* vibe_json_new_string(const char* s) {
 }
 
 /**
- * vibe_json_free - Recursively frees a JSON value structure
+ * Recursively frees a JSON value and all memory it owns.
+ *
+ * Frees the value node and any nested resources: string contents, array elements and element arrays,
+ * object keys, object values and key/value arrays. No-op if `v` is NULL.
+ *
+ * @param v JSON value to free (may be NULL).
  */
 static inline void vibe_json_free(vibe_json_value_t* v) {
-    // Internal Logic: Recursively traverse the JSON tree to free all allocated memory for strings, arrays, and objects.
     if (!v) return;
     if (v->type == VIBE_JSON_STRING) {
         free(v->value.string);
@@ -87,10 +94,15 @@ static inline void vibe_json_free(vibe_json_value_t* v) {
 }
 
 /**
- * _vibe_json_print_escaped - Internal helper for secure string escaping
+ * Print a JSON-escaped string to stdout.
+ *
+ * If `s` is NULL, prints "null". Otherwise prints a double-quoted, JSON-compliantly
+ * escaped representation of `s` (escapes double quotes, backslashes, and control
+ * characters U+0000 through U+001F).
+ *
+ * @param s Input string to escape and print.
  */
 static inline void _vibe_json_print_escaped(const char* s) {
-    // Internal Logic: Implement JSON-compliant escaping for quotes, backslashes, and control characters (U+0000 to U+001F).
     if (!s) { fputs("null", stdout); return; }
     putchar('\"');
     const char* start = s;
@@ -123,7 +135,15 @@ static inline void _vibe_json_print_escaped(const char* s) {
 }
 
 /**
- * _vibe_json_print_recursive - Internal helper for depth-tracked printing
+ * Recursively serializes a JSON value to standard output with depth protection.
+ *
+ * If `v` is NULL or `depth` exceeds VIBE_JSON_MAX_DEPTH, the function writes
+ * "null" to stdout. Otherwise it writes a JSON representation of `v` (strings
+ * are escaped, numbers follow JSON-compatible formatting, arrays and objects are
+ * emitted with proper separators).
+ *
+ * @param v JSON value to serialize; may be NULL.
+ * @param depth Current recursion depth (0 for the initial call).
  */
 static inline void _vibe_json_print_recursive(vibe_json_value_t* v, int depth) {
     // Sentinel: Depth tracking to prevent stack overflow DoS by enforcing VIBE_JSON_MAX_DEPTH.
@@ -184,10 +204,11 @@ static inline void _vibe_json_print_recursive(vibe_json_value_t* v, int depth) {
 }
 
 /**
- * vibe_json_print - Prints a JSON value to stdout with security depth tracking
+ * Print the JSON representation of a value to stdout.
+ *
+ * @param v JSON value to print; may be NULL (prints "null").
  */
 static inline void vibe_json_print(vibe_json_value_t* v) {
-    // Internal Logic: Entry point for JSON printing, initializing depth tracking at zero.
     _vibe_json_print_recursive(v, 0);
 }
 
