@@ -3,7 +3,7 @@
 The Vibe C Compiler is a project management and compilation suite designed to make C development easier and more intuitive than using GCC directly. It wraps around Clang to provide seamless cross-compilation support and project directory management.
 
 >[!NOTE]
-> THIS CODE IS AI GENERATED. ESSENTIALLY I RAN A TEST TO SEE WHAT THE AI COULD MAKE WITH A VERY SIMPLE PROMPT.
+> THIS CODE IS AI GENERATED. ESSENTIALLY I RAN A TEST TO SEE WHAT THE AI COULD MAKE WITH A VERY SIMPLE PROMPT. Dont use this for production.
 
 ## Features
 
