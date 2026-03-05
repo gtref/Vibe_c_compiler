@@ -107,8 +107,8 @@ This log tracks all security-related changes and audits performed on the Vibe C 
 ## Project Navigation
 
 - [Home (README)](../README.md)
-- [Documentation](../DOCS/README.md)
-- [Developer Docs](../DOCS/dev/README.md)
+- [Documentation](../docs/index.md)
+- [Developer Docs](../docs/architecture.md)
 - [Security Policy](../SECURITY.md)
 - [Contributing Guidelines](../CONTRIBUTING.md)
 - [Contributors](../CONTRIBUTORS.md)

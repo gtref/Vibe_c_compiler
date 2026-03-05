@@ -50,8 +50,8 @@ This Code of Conduct is adapted from the [Contributor Covenant][homepage], versi
 ## Project Navigation
 
 - [Home (README)](README.md)
-- [Documentation](DOCS/README.md)
-- [Developer Docs](DOCS/dev/README.md)
+- [Documentation](docs/index.md)
+- [Developer Docs](docs/architecture.md)
 - [Security Policy](SECURITY.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Contributors](CONTRIBUTORS.md)

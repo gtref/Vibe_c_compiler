@@ -56,8 +56,8 @@ Thank you for your interest in contributing to the Vibe C Compiler! We welcome c
 - Follow the existing style in `vibe/include/`.
 
 ### Documentation
-- If you add a CLI command, update `DOCS/README.md` and `README.md`.
-- If you add a new header, update the header list in `DOCS/README.md`.
+- If you add a CLI command, update `docs/index.md` and `README.md`.
+- If you add a new header, update the header list in `docs/headers.md`.
 - Major changes should be recorded in `Jules/DEV.md`.
 
 ## Philosophy
@@ -74,8 +74,8 @@ If you have any questions, feel free to open an issue or contact the core team m
 ## Project Navigation
 
 - [Home (README)](README.md)
-- [Documentation](DOCS/README.md)
-- [Developer Docs](DOCS/dev/README.md)
+- [Documentation](docs/index.md)
+- [Developer Docs](docs/architecture.md)
 - [Security Policy](SECURITY.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Contributors](CONTRIBUTORS.md)

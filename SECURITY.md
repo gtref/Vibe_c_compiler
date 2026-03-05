@@ -42,8 +42,8 @@ If you find a security vulnerability in Vibe C Compiler, please do not open a pu
 ## Project Navigation
 
 - [Home (README)](README.md)
-- [Documentation](DOCS/README.md)
-- [Developer Docs](DOCS/dev/README.md)
+- [Documentation](docs/index.md)
+- [Developer Docs](docs/architecture.md)
 - [Security Policy](SECURITY.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Contributors](CONTRIBUTORS.md)
