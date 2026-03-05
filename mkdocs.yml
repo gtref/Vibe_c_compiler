@@ -1,6 +1,6 @@
 site_name: Vibe C Compiler
 site_description: A high-performance C project manager and compiler driver.
-repo_url: https://github.com/DOM5-web/vibe_c_compiler
+repo_url: https://github.com/gtref/Vibe_c_compiler
 edit_uri: edit/main/docs/
 
 theme:
