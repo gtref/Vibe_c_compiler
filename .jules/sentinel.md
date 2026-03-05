@@ -87,3 +87,8 @@
 **Vulnerability:** Unhardened `snprintf` usage and insecure string copying (buffer overflow or missing null-termination).
 **Learning:** Hardening `printf` alone is insufficient if the ecosystem still allows unhardened variadic functions like `snprintf`. Additionally, a unified "safe" string copy primitive is essential to prevent common C string errors that lead to memory corruption.
 **Prevention:** Extend compile-time format string enforcement (using `"" fmt`) to all `printf`-like functions. Provide a robust `vibe_str_copy` alternative that guarantees null-termination and size enforcement for all string operations.
+
+## 2026-08-25 - [1.5.12] - Descriptor Leakage in Network Accept
+**Vulnerability:** Lack of `FD_CLOEXEC` on sockets returned by `accept()`.
+**Learning:** Hardening server listener sockets is insufficient if the resulting client sockets are not also hardened; they inherit the "close-on-exec" behavior only if explicitly set or if using `accept4` (which is not available on all POSIX systems).
+**Prevention:** Always wrap `accept()` in a helper that explicitly sets `FD_CLOEXEC` on the new descriptor before returning it to the application.

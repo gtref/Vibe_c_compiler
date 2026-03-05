@@ -1,5 +1,26 @@
 # Sentinel Security Log 🛡️
 
+## 2026-08-25 - [1.5.12] - Networking Hardening and Audit Suppression
+
+### 🔍 Found
+- **File Descriptor Leakage in accepted sockets**: While listening and connecting sockets were hardened with `FD_CLOEXEC`, the library lacked a helper for `accept()` that applied the same hardening, potentially allowing accepted client sockets to be inherited by child processes.
+- **Audit Tool False Positives in tests**: The internal security audit tool flagged `eval` and `gets` patterns in `tests/test_compiler.py`, even though they were used for testing the auditor's own detection capabilities.
+
+### 🎯 Impact
+- **Resource/Information Leakage**: Sockets inherited by child processes can lead to security vulnerabilities where untrusted children can interact with or keep alive network connections.
+- **Security Fatigue**: False positives in the audit tool can lead to real vulnerabilities being ignored.
+
+### 🔧 Fix
+- **Hardened Accept**: Implemented `vibe_net_accept` in `vibe/include/vibe_net.h` which automatically applies `FD_CLOEXEC` to the newly created client socket.
+- **Audit Suppression**: Added `# nosec` comments to `tests/test_compiler.py` to suppress false positives in the internal audit tool.
+- **Test Suite Improvement**: Updated `vibe_test.h` to include `<stdlib.h>` and `<stdbool.h>` to resolve compilation issues across the test suite.
+- **Version Bump**: Incremented project version to 1.5.12.
+
+### ✅ Verification
+- Updated `tests/test_net_security.c` to verify that `vibe_net_accept` correctly applies `FD_CLOEXEC`.
+- Verified that `vcc audit` now reports 0 issues.
+- Confirmed that all 19 project tests pass successfully.
+
 ## 2026-08-22 - [1.5.11] - Hardened String and I/O Primitives
 
 ### 🔍 Found

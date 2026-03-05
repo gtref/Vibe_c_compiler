@@ -96,4 +96,23 @@ static inline int vibe_net_connect(const char* ip, int port) {
     return sock;
 }
 
+/**
+ * vibe_net_accept - Accepts a new connection on a server socket.
+ * Internal Logic: Wraps the standard accept call and applies FD_CLOEXEC for security.
+ */
+static inline int vibe_net_accept(int server_fd, struct sockaddr *addr, socklen_t *addrlen) {
+    // Internal Logic: Perform the standard accept operation.
+    int client_fd = accept(server_fd, addr, addrlen);
+    if (client_fd < 0) return -1;
+
+    // Internal Logic: Set FD_CLOEXEC on the new client socket to prevent descriptor leakage.
+    int flags = fcntl(client_fd, F_GETFD);
+    if (flags == -1 || fcntl(client_fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
+        close(client_fd);
+        return -1;
+    }
+
+    return client_fd;
+}
+
 #endif

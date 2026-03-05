@@ -49,9 +49,38 @@ void test_socket_options() {
     close(fd);
 }
 
+/**
+ * test_accept_cloexec - Verifies that accepted sockets have FD_CLOEXEC set.
+ * Internal Logic: Sets up a server, connects a client, and checks flags on the accepted socket.
+ */
+void test_accept_cloexec() {
+    vibe_print("Testing accept FD_CLOEXEC...\n");
+    int port = 10001;
+    int server_fd = vibe_net_listen(port);
+    VIBE_ASSERT(server_fd >= 0);
+
+    int client_fd_connect = vibe_net_connect("127.0.0.1", port);
+    VIBE_ASSERT(client_fd_connect >= 0);
+
+    struct sockaddr_in addr;
+    socklen_t addrlen = sizeof(addr);
+    int client_fd_accept = vibe_net_accept(server_fd, (struct sockaddr *)&addr, &addrlen);
+    VIBE_ASSERT(client_fd_accept >= 0);
+
+    // Check FD_CLOEXEC on the accepted socket
+    int flags = fcntl(client_fd_accept, F_GETFD);
+    VIBE_ASSERT(flags != -1);
+    VIBE_ASSERT(flags & FD_CLOEXEC);
+
+    close(client_fd_accept);
+    close(client_fd_connect);
+    close(server_fd);
+}
+
 int main() {
     test_port_validation();
     test_socket_options();
+    test_accept_cloexec();
     VIBE_TEST_SUMMARY();
     return 0;
 }
