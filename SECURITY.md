@@ -1,5 +1,7 @@
 # Security Policy
 
+>[!WARNING]
+>THIS CODE IS AI GENERATED. DONT USE FOR ANYTHING OTHER THAN A TOOL. DONT USE FOR PRODUCTION.
 ## Security Audit (v1.5.8)
 
 A comprehensive security audit has been performed on the Vibe C Compiler v1.5.8 core and its custom headers.
