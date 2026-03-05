@@ -7,3 +7,7 @@
 ## 2026-07-28 - [Specialization for 32-byte keys in XOR Ciphers]
 **Learning:** Specializing for 32-byte keys in XOR ciphers (common for AES-256) by processing 256-bit blocks using four 64-bit words yields a significant (~12x) speedup compared to a generic byte-wise loop by eliminating per-byte branching and indexing overhead. Using 'memcpy' for loading and storing ensures alignment safety while still allowing the compiler to optimize the word-sized operations.
 **Action:** Always provide specialized paths for cryptographic-standard key sizes (16, 32 bytes) to maximize throughput in security-critical data processing.
+
+## 2026-08-01 - [Safety Hazards of SWAR on Null-Terminated Strings]
+**Learning:** Attempting to apply SWAR (word-sized processing) to null-terminated C strings without an explicit length or page-boundary awareness is dangerous. Loading a full word (e.g., 8 bytes) from a string that is near the end of an allocated buffer can cause an out-of-bounds read, potentially leading to segmentation faults or information leakage. Furthermore, in constant-time security primitives, adding complex SWAR logic can introduce unexpected timing variations or side channels.
+**Action:** Always prioritize memory safety over SWAR optimizations for short or null-terminated strings of unknown length. Only use SWAR when the buffer length is explicitly known and sufficient, or when using page-aligned safe loading techniques.

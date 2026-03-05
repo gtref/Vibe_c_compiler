@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "vibe_io.h"
 
 // Internal Logic: Global counters for tracking test execution and failure within a translation unit.
