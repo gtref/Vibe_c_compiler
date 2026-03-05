@@ -4,7 +4,7 @@
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/DOM5-web/vibe_c_compiler.git
+   git clone https://github.com/gtref/Vibe_c_compiler.git
    cd vibe_c_compiler
    ```
 
