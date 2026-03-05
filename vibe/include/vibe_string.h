@@ -14,7 +14,9 @@
  * Internal Logic: Guard against NULL pointer dereferences by checking inputs before calling strcmp.
  */
 static inline bool vibe_str_eq(const char* s1, const char* s2) {
-    if (!s1 || !s2) return s1 == s2;
+    // BOLT: Pointer equality fast-path to avoid strcmp for identical strings.
+    if (s1 == s2) return true;
+    if (!s1 || !s2) return false;
     return strcmp(s1, s2) == 0;
 }
 
