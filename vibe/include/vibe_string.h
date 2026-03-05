@@ -61,13 +61,11 @@ static inline void vibe_str_copy(char* dest, const char* src, size_t size) {
         return;
     }
 
-    size_t i = 0;
-    while (i < size - 1 && src[i] != '\0') {
-        dest[i] = src[i];
-        i++;
-    }
-
-    dest[i] = '\0';
+    // BOLT: Use memchr and memcpy for high-performance string copying.
+    const char* end = (const char*)memchr(src, '\0', size - 1);
+    size_t copy_len = end ? (size_t)(end - src) : size - 1;
+    memcpy(dest, src, copy_len);
+    dest[copy_len] = '\0';
 }
 
 #endif
