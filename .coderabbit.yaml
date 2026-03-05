@@ -1,0 +1,7 @@
+reviews:
+  prifile: assertive
+  request_changes_workflow: true
+  high_confidence_threshold: 0.6
+
+learnings:
+  enabled: true
