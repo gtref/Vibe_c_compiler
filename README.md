@@ -1,3 +1,7 @@
+[![Documentation Status](https://readthedocs.org/projects/vibe-c-compiler/badge/?version=latest)](https://vibe-c-compiler.readthedocs.io/en/latest/?badge=latest)
+
+
+
 # Vibe C Compiler (v1.5.11)
 ---
 
