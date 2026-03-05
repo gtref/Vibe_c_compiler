@@ -88,7 +88,7 @@ Includes binary hardening, input sanitization, safe environment management, and 
 
 - [Home (README)](../README.md)
 - [Documentation](../README.md)
-- [Developer Docs](../DOCS/dev/README.md)
+- [Developer Docs](../docs/architecture.md)
 - [Security Policy](../SECURITY.md)
 - [Contributing Guidelines](../CONTRIBUTING.md)
 - [Contributors](../CONTRIBUTORS.md)

@@ -101,15 +101,15 @@ The Vibe C Compiler is a project management and compilation suite designed to ma
 
 ## Documentation
 
-See [Documentation](DOCS/README.md) for full details on headers and advanced usage.
+See [Documentation](docs/index.md) for full details on headers and advanced usage.
 
 ---
 
 ## Project Navigation
 
 - [Home (README)](README.md)
-- [Documentation](DOCS/README.md)
-- [Developer Docs](DOCS/dev/README.md)
+- [Documentation](docs/index.md)
+- [Developer Docs](docs/architecture.md)
 - [Security Policy](SECURITY.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Contributors](CONTRIBUTORS.md)
