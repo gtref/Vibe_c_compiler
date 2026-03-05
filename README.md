@@ -1,4 +1,29 @@
 # Vibe C Compiler (v1.5.11)
+---
+
+> **NOTICE:** This repository is the primary **AI-Active Sandbox** for the Vibe C project. 
+
+This environment is currently being integrated and "vibed" by autonomous agents, including **Google Jules** and **CodeRabbit**. Expect high-frequency commits, experimental logic, and AI-driven architectural shifts.
+
+---
+
+## 🛠 Developer Direction
+
+If you are a human collaborator looking to contribute to the stable, governed version of this compiler, please move your development to the official human-led fork:
+
+👉 **[Human_c_compiler @ DOM5-web](https://github.com/DOM5-web/Human_c_compiler)**
+
+### Why the Split?
+* **The Hub (This Repo):** Optimized for AI velocity. Jules and CodeRabbit handle the heavy lifting, bug-squashing, and "vibe-checking" of new C implementations.
+* **The Fork (DOM5-web):** Optimized for human readability, documentation, and stable releases. This is where the "vibes" are translated into engineering.
+
+---
+
+## 🤖 Active Agents
+* **Google Jules:** Automated feature prototyping and systems logic.
+* **CodeRabbit:** Continuous AI code review and quality assurance.
+
+---
 
 The Vibe C Compiler is a project management and compilation suite designed to make C development easier and more intuitive than using GCC directly. It wraps around Clang to provide seamless cross-compilation support and project directory management.
 
