@@ -4,4 +4,4 @@ reviews:
   high_confidence_threshold: 0.6
 
 learnings:
-  enabled: true
+  enabled: false
